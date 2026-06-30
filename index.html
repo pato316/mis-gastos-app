@@ -1397,7 +1397,7 @@
           console.error(
             "[dc-runtime] sibling fetch for <" + name + "/>:",
             url,
-            "has no <x-dc> block \u2014 not a Design Component."
+            "has no x-dc block \u2014 not a Design Component."
           );
           return;
         }
@@ -1435,7 +1435,7 @@
         const Cls = evalDcLogic(src);
         if (r.jsSeq !== seq) return;
         if (typeof Cls !== "function") {
-          r.logicError = name + ".dc.html: <script data-dc-script> must define `class Component extends DCLogic`";
+          r.logicError = name + ".dc.html: script[data-dc-script] must define `class Component extends DCLogic`";
         } else {
           r.logicError = null;
           r.Logic = Cls;
