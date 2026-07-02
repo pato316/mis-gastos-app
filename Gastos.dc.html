@@ -81,6 +81,20 @@
         </div>
       </div>
 
+      <!-- fixed + variable breakdown -->
+      <div style="display:flex;gap:9px;margin-top:10px">
+        <div style="flex:1;background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:13px 14px">
+          <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Disponible fijo</div>
+          <div style="font-family:var(--fnum);font-size:17px;font-weight:600;margin-top:4px;color:{{ fixAvailColor }}">{{ fixAvailFmt }}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">de {{ fixBudgetFmt }}</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:13px 14px">
+          <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Disponible variable</div>
+          <div style="font-family:var(--fnum);font-size:17px;font-weight:600;margin-top:4px;color:{{ varAvailColor }}">{{ varAvailFmt }}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">de {{ varBudgetFmt }}</div>
+        </div>
+      </div>
+
       <!-- daily bars -->
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:16px 16px 12px;margin-top:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -689,10 +703,10 @@
   </sc-if>
 
   <!-- version stamp -->
-  <div style="position:absolute;left:0;right:0;bottom:84px;text-align:center;font-size:9px;color:var(--muted);padding:2px 0;letter-spacing:.3px;z-index:14;pointer-events:none">v1.4 · Jun 2026</div>
+  <div style="position:fixed;left:0;right:0;bottom:84px;max-width:480px;margin:0 auto;text-align:center;font-size:9px;color:var(--muted);padding:2px 0;letter-spacing:.3px;z-index:14;pointer-events:none">v1.4 · Jun 2026</div>
 
   <!-- bottom nav -->
-  <div style="position:absolute;left:0;right:0;bottom:0;height:84px;background:var(--card);border-top:1px solid var(--cb);display:flex;align-items:flex-start;padding:10px 8px 0;z-index:15">
+  <div style="position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;height:84px;background:var(--card);border-top:1px solid var(--cb);display:flex;align-items:flex-start;padding:10px 8px 0;z-index:15">
     <button onClick="{{ goInicio }}" style="flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:{{ colInicio }}">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg>
       <span style="font-size:9.5px;font-weight:600">Inicio</span>
@@ -1036,7 +1050,7 @@ class Component extends DCLogic {
     const actual=fixedActual+variableLogged+recurringContribution;
     const realActual=fixedActual+variableLogged+recurringActual;
     const budget=this.monthBudget;
-    return {exps,variableLogged,recurringActual,actual,realActual,budget,pct:budget?actual/budget*100:0};
+    return {exps,variableLogged,recurringActual,fixedActual,actual,realActual,budget,pct:budget?actual/budget*100:0};
   }
   sHex(pct){ return pct<85?'#3f8f63':pct<=100?'#c08a2e':'#b8472e'; }
 
@@ -1094,7 +1108,9 @@ class Component extends DCLogic {
     const monthComments={...this.state.monthComments}; delete monthComments[mi];
     // clear importedTotals for that month
     const importedTotals={...this.state.importedTotals}; delete importedTotals[mi];
-    this.setState({expenses,itemMatrix,caja,monthComments,importedTotals,showDeletePanel:false});
+    const fixedPayments={};
+    this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
+    this.setState({expenses,itemMatrix,caja,monthComments,importedTotals,fixedPayments,showDeletePanel:false});
   }
   resetAll(){
     if(!window.confirm('¿Borrar TODOS los datos y volver a cero? Esta acción no se puede deshacer.')) return;
@@ -1462,6 +1478,8 @@ class Component extends DCLogic {
       statusText:md.pct<85?'Vas bien':md.pct<=100?'Vas ajustado':'Te pasaste',
       spentFmt:this.fmt0(md.actual), budgetFmt:this.fmt0(md.budget),
       remainingFmt:this.fmt0(Math.abs(remaining)), remainColor:remaining>=0?'#3f8f63':'#b8472e',
+      fixAvailFmt:this.fmt0(Math.abs(this.fixedTotal-md.fixedActual)), fixAvailColor:(this.fixedTotal-md.fixedActual)>=0?'#3f8f63':'#b8472e', fixBudgetFmt:this.fmt0(this.fixedTotal),
+      varAvailFmt:this.fmt0(Math.abs(this.variableBudgetTotal-md.variableLogged)), varAvailColor:(this.variableBudgetTotal-md.variableLogged)>=0?'#3f8f63':'#b8472e', varBudgetFmt:this.fmt0(this.variableBudgetTotal),
       dailyLeftFmt:this.fmt0(Math.max(0,dailyLeft)), daysLeftLabel:daysLeft+' días · por día',
       todayFmt:this.fmt0(todaySpent), avgFmt:this.fmt0(variableBurn), projFmt:this.fmt0(projection), projColor:projection>md.budget?'#b8472e':'#3f8f63',
       topCats, recent,
