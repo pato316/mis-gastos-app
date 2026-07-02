@@ -1905,6 +1905,7 @@
       </div>
 
       <button onClick="{{ openCatEditor }}" style="width:100%;margin-top:12px;padding:11px 0;border-radius:13px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer">✏ Personalizar categorías</button>
+      <button onClick="{{ resetBudgets }}" style="width:100%;margin-top:8px;padding:11px 0;border-radius:13px;border:1.5px solid #b8472e;background:rgba(184,71,46,.06);color:#b8472e;font-size:13.5px;font-weight:600;cursor:pointer">🗑 Limpiar montos del presupuesto</button>
 
       <!-- fijos -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 4px 10px">
@@ -2718,6 +2719,15 @@ class Component extends DCLogic {
   }
   setRecurring(id,field,raw){ const v=parseFloat(String(raw).replace(/[^0-9.]/g,'')); if(isNaN(v)||v<0) return; const val=field==='interval'?Math.min(12,Math.max(1,Math.round(v)||1)):Math.round(v); this.setState(s=>({recurringConfig:{...s.recurringConfig,[id]:{...s.recurringConfig[id],[field]:val}}})); }
   setRcEdit(key,text){ this.setState({rcEditing:{key,text}}); }
+  resetBudgets(){
+    if(!window.confirm('¿Poner todos los montos del presupuesto en 0? Tus gastos y categorías no se borran.')) return;
+    const budgets={};
+    [...this.fixed,...this.variable].forEach(c=>{budgets[c.id]=0;});
+    const recurringDefs=(this.state.recurringDefs||[]).map(r=>({...r,amount:0}));
+    const recurringConfig={};
+    (this.state.recurringDefs||[]).forEach(r=>{recurringConfig[r.id]={...(this.state.recurringConfig?.[r.id]||{}),amount:0};});
+    this.setState({budgets,recurringDefs,recurringConfig});
+  }
   addFixed(){ const id='f'+Date.now(); this.setState(s=>({fixedDefs:[...(s.fixedDefs||[]),{id,name:'Nueva categoría',budget:0}]})); }
   setFixedName(id,val){ this.setState(s=>({fixedDefs:(s.fixedDefs||[]).map(f=>f.id===id?{...f,name:val}:f)})); }
   delFixed(id){ this.setState(s=>({fixedDefs:(s.fixedDefs||[]).filter(f=>f.id!==id)})); }
@@ -3110,6 +3120,7 @@ class Component extends DCLogic {
       onAmount:(e)=>this.setDraft('amount',e.target.value), onLabel:(e)=>this.setDraft('label',e.target.value), onDate:(e)=>this.setDraft('date',e.target.value),
       addGroups, draftRecurring,
       catEdFixes, catEdRecurr, catEdGroups,
+      resetBudgets:()=>this.resetBudgets(),
       openCatEditor:()=>this.setState({showCatEditor:true}),
       closeCatEditor:()=>this.setState({showCatEditor:false}),
       addFixedCat:()=>this.addFixed(),
