@@ -1640,7 +1640,7 @@
 <div ref="{{ rootRef }}" style="--bg:#f6f8fb;--card:#ffffff;--cb:#e7ecf3;--ink:#16202e;--muted:#7e8a9a;--subtle:#eef2f7;--accent:#2f6bd8;--fui:'Hanken Grotesk',system-ui,sans-serif;--fnum:'JetBrains Mono',monospace;--fdisp:'Hanken Grotesk',sans-serif;--rad:18px;position:relative;width:100%;height:100vh;height:100dvh;max-width:480px;margin:0 auto;background:var(--bg);color:var(--ink);font-family:var(--fui);overflow:hidden;display:flex;flex-direction:column">
 
   <!-- app bar -->
-  <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,12px) 22px 14px">
+  <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 14px) 22px 14px">
     <div>
       <div style="font-size:12px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)">{{ topKicker }}</div>
       <div style="font-size:23px;font-weight:600;letter-spacing:-.4px;margin-top:2px">{{ topTitle }}</div>
@@ -1655,7 +1655,7 @@
   </div>
 
   <!-- scroll content -->
-  <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 18px 110px">
+  <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 18px 76px">
 
     <!-- ============ INICIO ============ -->
     <sc-if value="{{ isInicio }}" hint-placeholder-val="{{ true }}">
@@ -2310,10 +2310,10 @@
   </sc-if>
 
   <!-- version stamp -->
-  <div style="position:fixed;left:0;right:0;bottom:84px;max-width:480px;margin:0 auto;text-align:center;font-size:9px;color:var(--muted);padding:2px 0;letter-spacing:.3px;z-index:14;pointer-events:none">v1.4 · Jun 2026</div>
+  <div style="position:fixed;left:0;right:0;bottom:58px;max-width:480px;margin:0 auto;text-align:center;font-size:9px;color:var(--muted);padding:2px 0;letter-spacing:.3px;z-index:14;pointer-events:none">v1.4 · Jul 2026</div>
 
   <!-- bottom nav -->
-  <div style="position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;height:84px;background:var(--card);border-top:1px solid var(--cb);display:flex;align-items:flex-start;padding:10px 8px 0;z-index:15">
+  <div style="position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;height:58px;background:var(--card);border-top:1px solid var(--cb);display:flex;align-items:center;padding:0 8px;z-index:15">
     <button onClick="{{ goInicio }}" style="flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:{{ colInicio }}">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg>
       <span style="font-size:9.5px;font-weight:600">Inicio</span>
@@ -2990,7 +2990,7 @@ class Component extends DCLogic {
     const itemGasto={}; its.forEach(it=>{itemGasto[it.id]=im[it.id].reduce((a,b)=>a+b,0);});
     const gastoAnoTot=its.reduce((a,it)=>a+itemGasto[it.id],0);
     const presupTot=its.reduce((a,it)=>a+it.budget,0);
-    const difTot=presupTot-gastoAnoTot, difMes=difTot/12;
+    const difTot=gastoAnoTot>0?presupTot-gastoAnoTot:0, difMes=difTot/12;
     const itemHeader=its.map(it=>({short:it.short,color:it.color}));
     const monthMatrix=[]; for(let mi=0;mi<12;mi++){
       const cells=its.map(it=>{const v=im[it.id][mi];return {txt:v?this.fmt0(v):'·',color:v?'var(--ink)':'#c5cedb'};});
