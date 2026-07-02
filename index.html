@@ -1945,11 +1945,11 @@
           <div style="display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--cb)">
             <div style="flex:1">
               <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Monto (A$)</div>
-              <input type="number" value="{{ rc.amount }}" onInput="{{ rc.onAmount }}" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
+              <input type="number" value="{{ rc.amount }}" onFocus="{{ rc.onFocusAmount }}" onInput="{{ rc.onAmount }}" onBlur="{{ rc.onBlurAmount }}" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
             </div>
             <div style="flex:1">
               <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Cada X meses</div>
-              <input type="number" value="{{ rc.interval }}" onInput="{{ rc.onInterval }}" min="1" max="12" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
+              <input type="number" value="{{ rc.interval }}" onFocus="{{ rc.onFocusInterval }}" onInput="{{ rc.onInterval }}" onBlur="{{ rc.onBlurInterval }}" min="1" max="12" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
             </div>
           </div>
         </div>
@@ -2566,6 +2566,7 @@ class Component extends DCLogic {
       variableDefs: this.variable.map(v=>({id:v.id, name:v.name, group:v.group, budget:v.budget})),
       variableGroups: ['Comida','Transporte','Personal'],
       showCatEditor: false,
+      rcEditing: {key:null,text:''},
       expenses: ex,
     };
     // load persisted state — sanitise to prevent null arrays crashing renderVals
@@ -2715,7 +2716,8 @@ class Component extends DCLogic {
     const variableGroups=['Comida','Transporte','Personal'];
     this.setState({expenses:[],budgets,methods,fixedPayments,itemMatrix:{luz:z12(),mecanico:z12(),rego:z12(),viajes:z12(),otros:z12()},caja:{ppto:z12(),final:z12(),pct:z12(),ingreso:z12()},monthComments:{},importedTotals:{},currency:'AUD',period:'mensual',tab:'inicio',fixedTab:'registro',importMsg:'',prorate:false,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups});
   }
-  setRecurring(id,field,raw){ const v=parseFloat(String(raw).replace(/[^0-9.]/g,'')); if(isNaN(v)||v<=0) return; const val=field==='interval'?Math.min(12,Math.max(1,Math.round(v))):Math.round(v); this.setState(s=>({recurringConfig:{...s.recurringConfig,[id]:{...s.recurringConfig[id],[field]:val}}})); }
+  setRecurring(id,field,raw){ const v=parseFloat(String(raw).replace(/[^0-9.]/g,'')); if(isNaN(v)||v<0) return; const val=field==='interval'?Math.min(12,Math.max(1,Math.round(v)||1)):Math.round(v); this.setState(s=>({recurringConfig:{...s.recurringConfig,[id]:{...s.recurringConfig[id],[field]:val}}})); }
+  setRcEdit(key,text){ this.setState({rcEditing:{key,text}}); }
   addFixed(){ const id='f'+Date.now(); this.setState(s=>({fixedDefs:[...(s.fixedDefs||[]),{id,name:'Nueva categoría',budget:0}]})); }
   setFixedName(id,val){ this.setState(s=>({fixedDefs:(s.fixedDefs||[]).map(f=>f.id===id?{...f,name:val}:f)})); }
   delFixed(id){ this.setState(s=>({fixedDefs:(s.fixedDefs||[]).filter(f=>f.id!==id)})); }
@@ -2844,7 +2846,7 @@ class Component extends DCLogic {
       onInput:(e)=>{const t=e.target.value;this.setState({editing:{id,text:t}});this.setBudget(id,t);},
       onBlur:()=>this.setState({editing:{id:null,text:''}}), isEd};};
     const fixedList=this.fixed.map(f=>{const h=lineH(f.id);const b=this.budgetOf(f.id);return{name:f.name,value:h.isEd?S.editing.text:editVal(b),suffix:psuf,onFocus:h.onFocus,onInput:h.onInput,onBlur:h.onBlur};});
-    const recurringList=this.recurring.map(c=>{const rc=this._rc(c);return{name:rc.name,amount:rc.amount,interval:rc.interval,perFmt:this.fmt0(rc.amount),intervalLabel:'cada '+rc.interval+' meses',amortFmt:this.fmt0(rc.amount/rc.interval*pf)+psuf,nextDueLabel:this.nextDue({...c,...rc}),annualFmt:this.fmt0(rc.amount*c.due.length),onAmount:e=>this.setRecurring(c.id,'amount',e.target.value),onInterval:e=>this.setRecurring(c.id,'interval',e.target.value)};});
+    const recurringList=this.recurring.map(c=>{const rc=this._rc(c);const kA=c.id+'_amount',kI=c.id+'_interval';const edA=S.rcEditing.key===kA,edI=S.rcEditing.key===kI;return{name:rc.name,amount:edA?S.rcEditing.text:String(rc.amount),interval:edI?S.rcEditing.text:String(rc.interval),perFmt:this.fmt0(rc.amount),intervalLabel:'cada '+rc.interval+' meses',amortFmt:this.fmt0(rc.amount/rc.interval*pf)+psuf,nextDueLabel:this.nextDue({...c,...rc}),annualFmt:this.fmt0(rc.amount*c.due.length),onAmount:e=>{this.setRcEdit(kA,e.target.value);this.setRecurring(c.id,'amount',e.target.value);},onInterval:e=>{this.setRcEdit(kI,e.target.value);this.setRecurring(c.id,'interval',e.target.value);},onFocusAmount:e=>this.setRcEdit(kA,e.target.value),onFocusInterval:e=>this.setRcEdit(kI,e.target.value),onBlurAmount:()=>this.setState({rcEditing:{key:null,text:''}}),onBlurInterval:()=>this.setState({rcEditing:{key:null,text:''}})};});
     const variableList=this.variable.map(c=>{const h=lineH(c.id);const b=this.budgetOf(c.id);const a=this.catActual(c.id,this.curMonth);const p=b?a/b*100:0;return{name:c.name,color:c.color,value:h.isEd?S.editing.text:editVal(b),suffix:psuf,actualFmt:this.fmt0(a*pf)+' gastado',barWidth:Math.min(100,p),barColor:this.sHex(p),onFocus:h.onFocus,onInput:h.onInput,onBlur:h.onBlur};});
     const variableActual=this.variable.reduce((s,c)=>s+this.catActual(c.id,this.curMonth),0);
     const mbp=this.monthBudget;
