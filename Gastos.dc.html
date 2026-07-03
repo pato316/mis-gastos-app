@@ -621,7 +621,7 @@
             </div>
             <sc-for list="{{ monthMatrix }}" as="m" hint-placeholder-count="12">
               <div onClick="{{ m.open }}" style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);cursor:pointer;background:{{ m.rowBg }}">
-                <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if></div>
+                <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if><sc-if value="{{ m.isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;flex:none">🔒</span></sc-if></div>
                 <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
                   <div style="flex:1;padding:9px 4px;text-align:right;color:{{ c.color }}">{{ c.txt }}</div>
                 </sc-for>
@@ -737,10 +737,16 @@
       <div style="font-size:18px;font-weight:600;margin-bottom:18px">Ajustes</div>
 
       <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px">Tema visual</div>
-      <div style="display:flex;gap:8px;margin-bottom:20px">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
         <button onClick="{{ themeSereno }}" style="flex:1;padding:11px 0;border-radius:12px;border:1.5px solid {{ bSereno }};background:var(--card);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)">Sereno</button>
         <button onClick="{{ themeEditorial }}" style="flex:1;padding:11px 0;border-radius:12px;border:1.5px solid {{ bEditorial }};background:var(--card);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)">Editorial</button>
         <button onClick="{{ themeLedger }}" style="flex:1;padding:11px 0;border-radius:12px;border:1.5px solid {{ bLedger }};background:var(--card);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)">Ledger</button>
+      </div>
+      <div onClick="{{ toggleDark }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:600">🌙 Modo oscuro</div>
+        <div style="width:46px;height:28px;border-radius:99px;flex:none;background:{{ darkBg }};position:relative;transition:background .2s">
+          <div style="position:absolute;top:3px;left:{{ darkX }};width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+        </div>
       </div>
 
       <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px">Moneda</div>
@@ -760,7 +766,16 @@
         </div>
       </div>
 
-      <div style="margin-top:28px;border-top:1px solid var(--cb);padding-top:20px">
+      <div style="margin-top:20px;border-top:1px solid var(--cb);padding-top:18px">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Datos</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button onClick="{{ exportData }}" style="flex:1;padding:12px 0;border-radius:12px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">⬇ Exportar</button>
+          <button onClick="{{ triggerImportAll }}" style="flex:1;padding:12px 0;border-radius:12px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">⬆ Importar</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Exporta/importa todos tus datos (JSON). Útil para backup o cambiar de dispositivo.</div>
+        <sc-if value="{{ settingsMsg }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);text-align:center;margin-bottom:12px">{{ settingsMsg }}</div>
+        </sc-if>
         <button onClick="{{ resetAll }}" style="width:100%;padding:13px 0;border-radius:13px;border:1.5px solid #b8472e;background:rgba(184,71,46,.06);color:#b8472e;font-size:14px;font-weight:600;cursor:pointer">
           🗑 Restablecer todos los datos
         </button>
@@ -845,14 +860,19 @@
       <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 2px 8px;flex:none">Comentario del mes</div>
       <textarea value="{{ monthSheet.comment }}" onInput="{{ monthSheet.onComment }}" placeholder="Notas: viajes, reparaciones, gastos puntuales…" style="background:var(--card);border:1px solid var(--cb);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.5;min-height:80px;flex:none;width:100%"></textarea>
 
-      <button onClick="{{ monthSheet.doImport }}" style="flex:none;margin-top:14px;padding:14px 0;border-radius:13px;border:1.5px solid var(--accent);background:none;color:var(--accent);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
-        Importar Excel de este mes
-      </button>
+      <div style="display:flex;gap:8px;margin-top:14px;flex:none">
+        <button onClick="{{ monthSheet.doImport }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid var(--accent);background:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
+          Importar mes
+        </button>
+        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--muted)' }};font-size:13px;font-weight:600;cursor:pointer">
+          {{ monthIsClosed ? '🔒 Cerrado' : '📌 Cerrar mes' }}
+        </button>
+      </div>
       <sc-if value="{{ importMsg }}" hint-placeholder-val="{{ false }}">
         <div style="font-size:12px;color:var(--accent);font-weight:500;margin-top:10px;flex:none;text-align:center">{{ importMsg }}</div>
       </sc-if>
-      <div style="font-size:11px;color:var(--muted);margin-top:10px;flex:none;line-height:1.5">Sube el .xlsx del mes (hoja «Data» con columnas Day · Monto · Detalle · Clasificación). Mapeo Luz, Mecánico, REGO y Viajes automáticamente.</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;flex:none;line-height:1.5">Importar: sube .xlsx, .csv o .json. «Cerrar mes» graba el total real en el tab Anual.</div>
     </div>
   </sc-if>
 
@@ -877,7 +897,8 @@
     </div>
   </sc-if>
 
-  <input type="file" accept=".xlsx" ref="{{ fileRef }}" onChange="{{ onImportFile }}" style="display:none"/>
+  <input type="file" accept=".xlsx,.csv,.json" ref="{{ fileRef }}" onChange="{{ onImportFile }}" style="display:none"/>
+  <input type="file" accept=".json" ref="{{ importAllRef }}" onChange="{{ onImportAll }}" style="display:none"/>
 
 </div>
 </x-dc>
@@ -948,6 +969,7 @@ class Component extends DCLogic {
     const monthComments={};
     const caja={ppto:z12(),final:z12(),pct:z12(),ingreso:z12()};
     this.fileRef=React.createRef();
+    this.importAllRef=React.createRef();
     const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
     this._lsKey='gastos_app_v4';
 
@@ -975,6 +997,11 @@ class Component extends DCLogic {
       variableGroups: ['Comida','Transporte','Personal'],
       showCatEditor: false,
       rcEditing: {key:null,text:''},
+      ibEditing: {key:null,text:''},
+      itemBudgets: {luz:1650,mecanico:600,rego:900,viajes:3000,otros:0},
+      darkMode: false,
+      closedMonths: {},
+      settingsMsg: '',
       expenses: ex,
     };
     // load persisted state — sanitise to prevent null arrays crashing renderVals
@@ -994,6 +1021,8 @@ class Component extends DCLogic {
         if(!Array.isArray(s.recurringDefs)) delete s.recurringDefs;
         if(!Array.isArray(s.variableDefs)) delete s.variableDefs;
         if(!Array.isArray(s.variableGroups)) delete s.variableGroups;
+        if(!s.itemBudgets||typeof s.itemBudgets!=='object') delete s.itemBudgets;
+        if(!s.closedMonths||typeof s.closedMonths!=='object') delete s.closedMonths;
         if(!s.draft||typeof s.draft!=='object') delete s.draft;
         this.state={...this.state,...s};
       }
@@ -1009,6 +1038,7 @@ class Component extends DCLogic {
       editorial:{bg:'#f6f3ec',card:'#fffdf8',cb:'#e8e2d4',ink:'#241f18',muted:'#8a8073',subtle:'#efe8da',accent:'#a15238',fui:"'Hanken Grotesk',system-ui,sans-serif",fnum:"'Newsreader',Georgia,serif",fdisp:"'Newsreader',Georgia,serif",rad:'9px'},
       ledger:{bg:'#f3f2ec',card:'#fbfaf5',cb:'#e1ded3',ink:'#17120b',muted:'#857e6f',subtle:'#ece9df',accent:'#17120b',fui:"'JetBrains Mono',monospace",fnum:"'JetBrains Mono',monospace",fdisp:"'JetBrains Mono',monospace",rad:'4px'},
     }[this.state.theme]||{};
+    if(this.state.darkMode){ T.bg='#0f1117'; T.card='#1a1d27'; T.cb='#2a2f3e'; T.ink='#e8ecf2'; T.muted='#6b7685'; T.subtle='#14171f'; }
     const acc=this.props.accentColor||T.accent;
     const map={'--bg':T.bg,'--card':T.card,'--cb':T.cb,'--ink':T.ink,'--muted':T.muted,'--subtle':T.subtle,'--accent':acc,'--fui':T.fui,'--fnum':T.fnum,'--fdisp':T.fdisp,'--rad':T.rad};
     Object.keys(map).forEach(k=>{ if(map[k]) el.style.setProperty(k,map[k]); });
@@ -1089,8 +1119,8 @@ class Component extends DCLogic {
   setCaja(field,mi,raw){ let v=parseFloat(String(raw).replace(/[^0-9.\-]/g,'')); if(isNaN(v))v=0; this.setState(s=>{const c={...s.caja}; c[field]=c[field].slice(); c[field][mi]=v; return {caja:c};}); }
   componentDidUpdate(){
     this.applyTheme();
-    const {expenses,budgets,methods,fixedPayments,itemMatrix,caja,monthComments,importedTotals,currency,period,tab,fixedTab,prorate,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups}=this.state;
-    try{localStorage.setItem(this._lsKey,JSON.stringify({expenses,budgets,methods,fixedPayments,itemMatrix,caja,monthComments,importedTotals,currency,period,tab,fixedTab,prorate,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups}));}catch(e){}
+    const {expenses,budgets,methods,fixedPayments,itemMatrix,caja,monthComments,importedTotals,currency,period,tab,fixedTab,prorate,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups,itemBudgets,darkMode,closedMonths}=this.state;
+    try{localStorage.setItem(this._lsKey,JSON.stringify({expenses,budgets,methods,fixedPayments,itemMatrix,caja,monthComments,importedTotals,currency,period,tab,fixedTab,prorate,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups,itemBudgets,darkMode,closedMonths}));}catch(e){}
   }
   resetMonth(mi){
     const name=this.monthFull[mi];
@@ -1106,11 +1136,12 @@ class Component extends DCLogic {
     Object.keys(this.state.caja).forEach(k=>{const a=this.state.caja[k].slice(); a[mi]=0; caja[k]=a;});
     // clear comment for that month
     const monthComments={...this.state.monthComments}; delete monthComments[mi];
-    // clear importedTotals for that month
+    // clear importedTotals and closedMonths for that month
     const importedTotals={...this.state.importedTotals}; delete importedTotals[mi];
+    const closedMonths={...this.state.closedMonths}; delete closedMonths[mi];
     const fixedPayments={};
     this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
-    this.setState({expenses,itemMatrix,caja,monthComments,importedTotals,fixedPayments,showDeletePanel:false});
+    this.setState({expenses,itemMatrix,caja,monthComments,importedTotals,closedMonths,fixedPayments,showDeletePanel:false});
   }
   resetAll(){
     if(!window.confirm('¿Borrar TODOS los datos y volver a cero? Esta acción no se puede deshacer.')) return;
@@ -1124,12 +1155,70 @@ class Component extends DCLogic {
     const recurringDefs=[{id:'luz',name:'Luz',amount:380,interval:3},{id:'rego',name:'REGO',amount:850,interval:6},{id:'mecanico',name:'Mecánico Auto',amount:600,interval:12}];
     const variableDefs=[{id:'desayuno',name:'Desayuno',group:'Comida',budget:60},{id:'almuerzo',name:'Almuerzo',group:'Comida',budget:200},{id:'cena',name:'Cena',group:'Comida',budget:150},{id:'comidas',name:'Comidas fuera',group:'Comida',budget:180},{id:'super',name:'Supermercado',group:'Comida',budget:600},{id:'bencina',name:'Bencina',group:'Transporte',budget:220},{id:'estac',name:'Estacionamiento',group:'Transporte',budget:60},{id:'peajes',name:'Peajes',group:'Transporte',budget:40},{id:'uber',name:'Uber',group:'Transporte',budget:80},{id:'transporte',name:'Transporte ciudad',group:'Transporte',budget:50},{id:'otroscasa',name:'Otros · Casa',group:'Personal',budget:120},{id:'otrospers',name:'Otros · Personal',group:'Personal',budget:100},{id:'regalos',name:'Regalos',group:'Personal',budget:80},{id:'libros',name:'Libros',group:'Personal',budget:40},{id:'ropa',name:'Ropa',group:'Personal',budget:120},{id:'viajes',name:'Viajes',group:'Personal',budget:250}];
     const variableGroups=['Comida','Transporte','Personal'];
-    this.setState({expenses:[],budgets,methods,fixedPayments,itemMatrix:{luz:z12(),mecanico:z12(),rego:z12(),viajes:z12(),otros:z12()},caja:{ppto:z12(),final:z12(),pct:z12(),ingreso:z12()},monthComments:{},importedTotals:{},currency:'AUD',period:'mensual',tab:'inicio',fixedTab:'registro',importMsg:'',prorate:false,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups});
+    this.setState({expenses:[],budgets,methods,fixedPayments,itemMatrix:{luz:z12(),mecanico:z12(),rego:z12(),viajes:z12(),otros:z12()},caja:{ppto:z12(),final:z12(),pct:z12(),ingreso:z12()},monthComments:{},importedTotals:{},closedMonths:{},currency:'AUD',period:'mensual',tab:'inicio',fixedTab:'registro',importMsg:'',prorate:false,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups});
   }
   setRecurring(id,field,raw){ const v=parseFloat(String(raw).replace(/[^0-9.]/g,'')); if(isNaN(v)||v<0) return; const val=field==='interval'?Math.min(12,Math.max(1,Math.round(v)||1)):Math.round(v); this.setState(s=>({recurringConfig:{...s.recurringConfig,[id]:{...s.recurringConfig[id],[field]:val}}})); }
   setRcEdit(key,text){ this.setState({rcEditing:{key,text}}); }
   setIbEdit(key,text){ this.setState({ibEditing:{key,text}}); }
   setItemBudget(id,raw){ const v=parseFloat(String(raw).replace(/[^0-9.]/g,'')); if(isNaN(v)||v<0) return; this.setState(s=>({itemBudgets:{...s.itemBudgets,[id]:Math.round(v)}})); }
+  toggleDark(){ this.setState(s=>({darkMode:!s.darkMode})); }
+  exportData(){
+    const S=this.state;
+    const data={expenses:S.expenses,budgets:S.budgets,methods:S.methods,fixedPayments:S.fixedPayments,itemMatrix:S.itemMatrix,caja:S.caja,monthComments:S.monthComments,importedTotals:S.importedTotals,closedMonths:S.closedMonths,currency:S.currency,period:S.period,theme:S.theme,prorate:S.prorate,recurringConfig:S.recurringConfig,fixedDefs:S.fixedDefs,recurringDefs:S.recurringDefs,variableDefs:S.variableDefs,variableGroups:S.variableGroups,itemBudgets:S.itemBudgets};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mis-gastos-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  }
+  triggerImportAll(){ if(this.importAllRef.current) this.importAllRef.current.click(); }
+  async onImportAll(e){
+    const file=e.target.files&&e.target.files[0]; e.target.value='';
+    if(!file) return;
+    try{
+      const text=await file.text(); const s=JSON.parse(text);
+      if(!Array.isArray(s.expenses)) throw new Error('invalid');
+      const z12=()=>[0,0,0,0,0,0,0,0,0,0,0,0];
+      const caja=s.caja&&typeof s.caja==='object'?s.caja:{ppto:z12(),final:z12(),pct:z12(),ingreso:z12()};
+      ['ppto','final','pct','ingreso'].forEach(k=>{if(!Array.isArray(caja[k]))caja[k]=z12();});
+      this.setState({expenses:s.expenses,budgets:s.budgets||{},methods:Array.isArray(s.methods)?s.methods:this.state.methods,fixedPayments:s.fixedPayments||{},itemMatrix:s.itemMatrix||this.state.itemMatrix,caja,monthComments:s.monthComments||{},importedTotals:s.importedTotals||{},closedMonths:s.closedMonths||{},currency:s.currency||this.state.currency,prorate:s.prorate!=null?s.prorate:this.state.prorate,recurringConfig:s.recurringConfig||this.state.recurringConfig,fixedDefs:Array.isArray(s.fixedDefs)?s.fixedDefs:this.state.fixedDefs,recurringDefs:Array.isArray(s.recurringDefs)?s.recurringDefs:this.state.recurringDefs,variableDefs:Array.isArray(s.variableDefs)?s.variableDefs:this.state.variableDefs,variableGroups:Array.isArray(s.variableGroups)?s.variableGroups:this.state.variableGroups,itemBudgets:s.itemBudgets||this.state.itemBudgets,settingsMsg:'✓ Datos importados correctamente'});
+      setTimeout(()=>this.setState({settingsMsg:''}),3000);
+    }catch(err){ this.setState({settingsMsg:'⚠ Archivo inválido'}); setTimeout(()=>this.setState({settingsMsg:''}),3000); }
+  }
+  stampMonth(mi){
+    if(!window.confirm(`¿Grabar el total real de ${this.monthFull[mi]} en el tab Anual?`)) return;
+    const expsMonth=this.state.expenses.filter(e=>new Date(e.date).getMonth()===mi);
+    const total=expsMonth.reduce((a,e)=>a+(e.amount||0),0);
+    this.setState(s=>({importedTotals:{...s.importedTotals,[mi]:total},closedMonths:{...s.closedMonths,[mi]:true}}));
+  }
+  async _importCsv(file,mi){
+    const text=await file.text(); const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(lines.length<2){ this.setState({importing:false,importMsg:'CSV vacío'}); return; }
+    const sep=lines[0].includes(';')?';':',';
+    const headers=lines[0].split(sep).map(h=>h.toLowerCase().replace(/"/g,'').trim());
+    const iDate=headers.findIndex(h=>h.includes('fecha')||h.includes('date')||h==='day');
+    const iAmt=headers.findIndex(h=>h.includes('monto')||h.includes('amount')||h.includes('importe')||h.includes('valor'));
+    const iCat=headers.findIndex(h=>h.includes('categ')||h.includes('clasif')||h.includes('cat'));
+    const iDesc=headers.findIndex(h=>h.includes('desc')||h.includes('detalle')||h.includes('label'));
+    if(iDate<0||iAmt<0){ this.setState({importing:false,importMsg:'CSV sin columnas fecha/monto'}); return; }
+    const year=this.year;
+    const rows=lines.slice(1).map((line,li)=>{
+      const cols=line.split(sep).map(c=>c.replace(/^"|"$/g,''));
+      const rawDate=(cols[iDate]||'').trim(); const rawAmt=(cols[iAmt]||'').trim();
+      const cat=iCat>=0?(cols[iCat]||'').trim():''; const label=iDesc>=0?(cols[iDesc]||'').trim():'';
+      const amount=parseFloat(rawAmt.replace(/[^0-9.]/g,''))||0;
+      let date=rawDate;
+      if(rawDate&&!/^\d{4}/.test(rawDate)){const p=rawDate.split(/[\/\-]/);if(p.length>=2)date=`${year}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;}
+      return {id:'csv_'+Date.now()+'_'+li,amount,cat:cat||'super',label,date,pm:'efectivo'};
+    }).filter(r=>r.amount>0&&!isNaN(new Date(r.date))&&new Date(r.date).getMonth()===mi);
+    const existing=this.state.expenses.filter(e=>new Date(e.date).getMonth()!==mi);
+    this.setState({expenses:[...existing,...rows],importing:false,importMsg:`✓ ${rows.length} gastos importados de ${this.monthFull[mi]}`});
+  }
+  async _importJson(file,mi){
+    const text=await file.text(); const data=JSON.parse(text);
+    if(!Array.isArray(data.expenses)){ this.setState({importing:false,importMsg:'JSON inválido'}); return; }
+    const monthExps=data.expenses.filter(e=>new Date(e.date).getMonth()===mi);
+    const existing=this.state.expenses.filter(e=>new Date(e.date).getMonth()!==mi);
+    const total=monthExps.reduce((a,e)=>a+(e.amount||0),0);
+    this.setState({expenses:[...existing,...monthExps],importing:false,importMsg:`✓ ${monthExps.length} gastos importados de ${this.monthFull[mi]} · ${this.fmt0(total)} total`});
+  }
   resetBudgets(){
     if(!window.confirm('¿Poner todos los montos del presupuesto en 0? Tus gastos y categorías no se borran.')) return;
     const budgets={};
@@ -1161,6 +1250,9 @@ class Component extends DCLogic {
     if(!file||mi==null) return;
     this.setState({importing:true,importMsg:''});
     try{
+      const name=file.name.toLowerCase();
+      if(name.endsWith('.csv')){ await this._importCsv(file,mi); return; }
+      if(name.endsWith('.json')){ await this._importJson(file,mi); return; }
       const res=await this.parseXlsx(file);
       if(res.error){ this.setState({importing:false,importMsg:res.error}); return; }
       const rows=res.rows; const sums={luz:0,mecanico:0,rego:0,viajes:0};
@@ -1391,7 +1483,7 @@ class Component extends DCLogic {
     const monthMatrix=[]; for(let mi=0;mi<12;mi++){
       const cells=its.map(it=>{const v=im[it.id][mi];return {txt:v?this.fmt0(v):'·',color:v?'var(--ink)':'#c5cedb'};});
       const tot=its.reduce((a,it)=>a+im[it.id][mi],0);
-      monthMatrix.push({abbr:this.monthAbbr[mi],cells,totFmt:tot?this.fmt0(tot):'·',hasComment:!!S.monthComments[mi],rowBg:mi===this.curMonth?'rgba(47,107,216,.06)':'transparent',open:()=>this.setState({showMonth:mi})});
+      monthMatrix.push({abbr:this.monthAbbr[mi],cells,totFmt:tot?this.fmt0(tot):'·',hasComment:!!S.monthComments[mi],isClosed:!!S.closedMonths[mi],rowBg:mi===this.curMonth?'rgba(47,107,216,.06)':'transparent',open:()=>this.setState({showMonth:mi})});
     }
     const itemFooter=its.map(it=>{const ib=S.itemBudgets?.[it.id]??it.budget; const k=it.id+'_ppto'; const isEd=S.ibEditing?.key===k; const dif=ib-itemGasto[it.id]; return{gastoFmt:this.fmt0(itemGasto[it.id]),presupV:isEd?S.ibEditing.text:String(ib),presupFmt:this.fmt0(ib),presupFocus:e=>this.setIbEdit(k,e.target.value),presupInput:e=>{this.setIbEdit(k,e.target.value);this.setItemBudget(it.id,e.target.value);},presupBlur:()=>this.setState({ibEditing:{key:null,text:''}}),difFmt:(dif<0?'−':'+')+this.fmt0(Math.abs(dif)),difColor:dif<0?'#b8472e':'#3f8f63'};});
     // ---- balance de caja mensual ----
@@ -1515,10 +1607,13 @@ class Component extends DCLogic {
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
       cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaFinalTotFmt:this.fmt0(cajaFinalTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual,
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
+      importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
       fileRef:this.fileRef, onImportFile:(e)=>this.onImportFile(e), importMsg:S.importMsg, importing:S.importing,
+      importAllRef:this.importAllRef, onImportAll:(e)=>this.onImportAll(e),
+      stampMonth:S.showMonth!=null?()=>this.stampMonth(S.showMonth):()=>{},
+      monthIsClosed:S.showMonth!=null&&!!S.closedMonths[S.showMonth],
 
       // settings
       bSereno:S.theme==='sereno'?accSel:'var(--cb)', bEditorial:S.theme==='editorial'?accSel:'var(--cb)', bLedger:S.theme==='ledger'?accSel:'var(--cb)',
@@ -1528,6 +1623,10 @@ class Component extends DCLogic {
       rateLabel:this.rate.toLocaleString('es-CL'),
       toggleProrate:()=>this.setState(s=>({prorate:!s.prorate})),
       prorateBg:S.prorate?'var(--accent)':'var(--cb)', prorateX:S.prorate?'21px':'3px',
+      darkMode:S.darkMode, toggleDark:()=>this.toggleDark(),
+      darkBg:S.darkMode?'var(--accent)':'var(--cb)', darkX:S.darkMode?'21px':'3px',
+      exportData:()=>this.exportData(), triggerImportAll:()=>this.triggerImportAll(),
+      settingsMsg:S.settingsMsg,
 
       // add
       draftAmount:S.draft.amount, draftLabel:S.draft.label, draftDate:S.draft.date,
