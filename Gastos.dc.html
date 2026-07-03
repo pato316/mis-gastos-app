@@ -759,7 +759,7 @@
       <div onClick="{{ toggleProrate }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0">
         <div style="flex:1;padding-right:14px">
           <div style="font-size:14px;font-weight:600">Prorratear recurrentes</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Reparte luz, REGO y mecánico mes a mes para un compliance estable.</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Reparte los gastos recurrentes mes a mes para un presupuesto estable.</div>
         </div>
         <div style="width:46px;height:28px;border-radius:99px;flex:none;background:{{ prorateBg }};position:relative;transition:background .2s">
           <div style="position:absolute;top:3px;left:{{ prorateX }};width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
@@ -781,6 +781,7 @@
         </button>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Borra gastos, medios de pago, tabla anual y caja. Pide confirmación.</div>
       </div>
+      <div style="margin-top:20px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.3px">v1.5 · Jul 2026</div>
     </div>
   </sc-if>
 
@@ -919,19 +920,19 @@ class Component extends DCLogic {
     this.weekdays = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     this.gc = {Fijos:'#14b8a6',Recurrentes:'#f59e0b',Comida:'#ff7a4d',Transporte:'#3d8bfd',Personal:'#a06be0'};
 
-    this.fixed = [['renta','Renta',2200],['internet','Internet',80],['salud','Seguro Médico',180],['celular','Celular · Telstra',65],['seguroauto','Seguro Auto',120],['corte','Corte de Pelo',40]]
+    this.fixed = [['renta','Renta',0],['internet','Internet',0],['salud','Seguro Médico',0],['celular','Celular · Telstra',0],['seguroauto','Seguro Auto',0],['corte','Corte de Pelo',0]]
       .map(a=>({id:a[0],name:a[1],budget:a[2],group:'Fijos',color:this.gc.Fijos}));
 
     this.recurring = [
-      {id:'luz',name:'Luz',amount:380,interval:3,due:[2,5,8,11],group:'Recurrentes',color:this.gc.Recurrentes},
-      {id:'rego',name:'REGO',amount:850,interval:6,due:[3,9],group:'Recurrentes',color:this.gc.Recurrentes},
-      {id:'mecanico',name:'Mecánico Auto',amount:600,interval:12,due:[7],group:'Recurrentes',color:this.gc.Recurrentes},
+      {id:'luz',name:'Luz',amount:0,interval:3,due:[2,5,8,11],group:'Recurrentes',color:this.gc.Recurrentes},
+      {id:'rego',name:'REGO',amount:0,interval:6,due:[3,9],group:'Recurrentes',color:this.gc.Recurrentes},
+      {id:'mecanico',name:'Mecánico Auto',amount:0,interval:12,due:[7],group:'Recurrentes',color:this.gc.Recurrentes},
     ];
 
     this.variable = [
-      ['desayuno','Desayuno','Comida',60],['almuerzo','Almuerzo','Comida',200],['cena','Cena','Comida',150],['comidas','Comidas fuera','Comida',180],['super','Supermercado','Comida',600],
-      ['bencina','Bencina','Transporte',220],['estac','Estacionamiento','Transporte',60],['peajes','Peajes','Transporte',40],['uber','Uber','Transporte',80],['transporte','Transporte ciudad','Transporte',50],
-      ['otroscasa','Otros · Casa','Personal',120],['otrospers','Otros · Personal','Personal',100],['regalos','Regalos','Personal',80],['libros','Libros','Personal',40],['ropa','Ropa','Personal',120],['viajes','Viajes','Personal',250],
+      ['desayuno','Desayuno','Comida',0],['almuerzo','Almuerzo','Comida',0],['cena','Cena','Comida',0],['comidas','Comidas fuera','Comida',0],['super','Supermercado','Comida',0],
+      ['bencina','Bencina','Transporte',0],['estac','Estacionamiento','Transporte',0],['peajes','Peajes','Transporte',0],['uber','Uber','Transporte',0],['transporte','Transporte ciudad','Transporte',0],
+      ['otroscasa','Otros · Casa','Personal',0],['otrospers','Otros · Personal','Personal',0],['regalos','Regalos','Personal',0],['libros','Libros','Personal',0],['ropa','Ropa','Personal',0],['viajes','Viajes','Personal',0],
     ].map(a=>({id:a[0],name:a[1],group:a[2],budget:a[3],color:this.gc[a[2]]}));
 
     this.cat = {};
@@ -952,10 +953,10 @@ class Component extends DCLogic {
     const ex=[];
 
     this.items=[
-      {id:'luz',name:'Luz',short:'Luz',budget:1650,color:'#f0a13a'},
-      {id:'mecanico',name:'Mecánico Auto',short:'Mecán.',budget:600,color:'#e07a52'},
-      {id:'rego',name:'REGO',short:'REGO',budget:900,color:'#d9b441'},
-      {id:'viajes',name:'Viajes',short:'Viajes',budget:3000,color:'#4aa3df'},
+      {id:'luz',name:'Luz',short:'Luz',budget:0,color:'#f0a13a'},
+      {id:'mecanico',name:'Mecánico Auto',short:'Mecán.',budget:0,color:'#e07a52'},
+      {id:'rego',name:'REGO',short:'REGO',budget:0,color:'#d9b441'},
+      {id:'viajes',name:'Viajes',short:'Viajes',budget:0,color:'#4aa3df'},
       {id:'otros',name:'Otros fuera ppto',short:'Otros',budget:0,color:'#b56b9a'},
     ];
     const z12=()=>[0,0,0,0,0,0,0,0,0,0,0,0];
@@ -990,7 +991,7 @@ class Component extends DCLogic {
       methods,
       fixedTab:'registro', fixedPayments,
       itemMatrix, monthComments, caja, importedTotals:{}, showImportPicker:false, showDeletePanel:false, deleteMonth:0, showMonth:null, importing:false, importMsg:'',
-      recurringConfig:{luz:{amount:380,interval:3},rego:{amount:850,interval:6},mecanico:{amount:600,interval:12}},
+      recurringConfig:{luz:{amount:0,interval:3},rego:{amount:0,interval:6},mecanico:{amount:0,interval:12}},
       fixedDefs: this.fixed.map(f=>({id:f.id, name:f.name, budget:f.budget})),
       recurringDefs: this.recurring.map(r=>({id:r.id, name:r.name, amount:r.amount, interval:r.interval})),
       variableDefs: this.variable.map(v=>({id:v.id, name:v.name, group:v.group, budget:v.budget})),

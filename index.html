@@ -2309,8 +2309,6 @@
     </button>
   </sc-if>
 
-  <!-- version stamp -->
-  <div style="position:fixed;left:0;right:0;bottom:58px;max-width:480px;margin:0 auto;text-align:center;font-size:9px;color:var(--muted);padding:2px 0;letter-spacing:.3px;z-index:14;pointer-events:none">v1.4 · Jul 2026</div>
 
   <!-- bottom nav -->
   <div style="position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;height:58px;background:var(--card);border-top:1px solid var(--cb);display:flex;align-items:center;padding:0 8px;z-index:15">
@@ -2366,7 +2364,7 @@
       <div onClick="{{ toggleProrate }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0">
         <div style="flex:1;padding-right:14px">
           <div style="font-size:14px;font-weight:600">Prorratear recurrentes</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Reparte luz, REGO y mecánico mes a mes para un compliance estable.</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Reparte los gastos recurrentes mes a mes para un presupuesto estable.</div>
         </div>
         <div style="width:46px;height:28px;border-radius:99px;flex:none;background:{{ prorateBg }};position:relative;transition:background .2s">
           <div style="position:absolute;top:3px;left:{{ prorateX }};width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
@@ -2388,6 +2386,7 @@
         </button>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Borra gastos, medios de pago, tabla anual y caja. Pide confirmación.</div>
       </div>
+      <div style="margin-top:20px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.3px">v1.5 · Jul 2026</div>
     </div>
   </sc-if>
 
@@ -2526,19 +2525,19 @@ class Component extends DCLogic {
     this.weekdays = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     this.gc = {Fijos:'#14b8a6',Recurrentes:'#f59e0b',Comida:'#ff7a4d',Transporte:'#3d8bfd',Personal:'#a06be0'};
 
-    this.fixed = [['renta','Renta',2200],['internet','Internet',80],['salud','Seguro Médico',180],['celular','Celular · Telstra',65],['seguroauto','Seguro Auto',120],['corte','Corte de Pelo',40]]
+    this.fixed = [['renta','Renta',0],['internet','Internet',0],['salud','Seguro Médico',0],['celular','Celular · Telstra',0],['seguroauto','Seguro Auto',0],['corte','Corte de Pelo',0]]
       .map(a=>({id:a[0],name:a[1],budget:a[2],group:'Fijos',color:this.gc.Fijos}));
 
     this.recurring = [
-      {id:'luz',name:'Luz',amount:380,interval:3,due:[2,5,8,11],group:'Recurrentes',color:this.gc.Recurrentes},
-      {id:'rego',name:'REGO',amount:850,interval:6,due:[3,9],group:'Recurrentes',color:this.gc.Recurrentes},
-      {id:'mecanico',name:'Mecánico Auto',amount:600,interval:12,due:[7],group:'Recurrentes',color:this.gc.Recurrentes},
+      {id:'luz',name:'Luz',amount:0,interval:3,due:[2,5,8,11],group:'Recurrentes',color:this.gc.Recurrentes},
+      {id:'rego',name:'REGO',amount:0,interval:6,due:[3,9],group:'Recurrentes',color:this.gc.Recurrentes},
+      {id:'mecanico',name:'Mecánico Auto',amount:0,interval:12,due:[7],group:'Recurrentes',color:this.gc.Recurrentes},
     ];
 
     this.variable = [
-      ['desayuno','Desayuno','Comida',60],['almuerzo','Almuerzo','Comida',200],['cena','Cena','Comida',150],['comidas','Comidas fuera','Comida',180],['super','Supermercado','Comida',600],
-      ['bencina','Bencina','Transporte',220],['estac','Estacionamiento','Transporte',60],['peajes','Peajes','Transporte',40],['uber','Uber','Transporte',80],['transporte','Transporte ciudad','Transporte',50],
-      ['otroscasa','Otros · Casa','Personal',120],['otrospers','Otros · Personal','Personal',100],['regalos','Regalos','Personal',80],['libros','Libros','Personal',40],['ropa','Ropa','Personal',120],['viajes','Viajes','Personal',250],
+      ['desayuno','Desayuno','Comida',0],['almuerzo','Almuerzo','Comida',0],['cena','Cena','Comida',0],['comidas','Comidas fuera','Comida',0],['super','Supermercado','Comida',0],
+      ['bencina','Bencina','Transporte',0],['estac','Estacionamiento','Transporte',0],['peajes','Peajes','Transporte',0],['uber','Uber','Transporte',0],['transporte','Transporte ciudad','Transporte',0],
+      ['otroscasa','Otros · Casa','Personal',0],['otrospers','Otros · Personal','Personal',0],['regalos','Regalos','Personal',0],['libros','Libros','Personal',0],['ropa','Ropa','Personal',0],['viajes','Viajes','Personal',0],
     ].map(a=>({id:a[0],name:a[1],group:a[2],budget:a[3],color:this.gc[a[2]]}));
 
     this.cat = {};
@@ -2559,10 +2558,10 @@ class Component extends DCLogic {
     const ex=[];
 
     this.items=[
-      {id:'luz',name:'Luz',short:'Luz',budget:1650,color:'#f0a13a'},
-      {id:'mecanico',name:'Mecánico Auto',short:'Mecán.',budget:600,color:'#e07a52'},
-      {id:'rego',name:'REGO',short:'REGO',budget:900,color:'#d9b441'},
-      {id:'viajes',name:'Viajes',short:'Viajes',budget:3000,color:'#4aa3df'},
+      {id:'luz',name:'Luz',short:'Luz',budget:0,color:'#f0a13a'},
+      {id:'mecanico',name:'Mecánico Auto',short:'Mecán.',budget:0,color:'#e07a52'},
+      {id:'rego',name:'REGO',short:'REGO',budget:0,color:'#d9b441'},
+      {id:'viajes',name:'Viajes',short:'Viajes',budget:0,color:'#4aa3df'},
       {id:'otros',name:'Otros fuera ppto',short:'Otros',budget:0,color:'#b56b9a'},
     ];
     const z12=()=>[0,0,0,0,0,0,0,0,0,0,0,0];
@@ -2597,7 +2596,7 @@ class Component extends DCLogic {
       methods,
       fixedTab:'registro', fixedPayments,
       itemMatrix, monthComments, caja, importedTotals:{}, showImportPicker:false, showDeletePanel:false, deleteMonth:0, showMonth:null, importing:false, importMsg:'',
-      recurringConfig:{luz:{amount:380,interval:3},rego:{amount:850,interval:6},mecanico:{amount:600,interval:12}},
+      recurringConfig:{luz:{amount:0,interval:3},rego:{amount:0,interval:6},mecanico:{amount:0,interval:12}},
       fixedDefs: this.fixed.map(f=>({id:f.id, name:f.name, budget:f.budget})),
       recurringDefs: this.recurring.map(r=>({id:r.id, name:r.name, amount:r.amount, interval:r.interval})),
       variableDefs: this.variable.map(v=>({id:v.id, name:v.name, group:v.group, budget:v.budget})),
@@ -2605,7 +2604,7 @@ class Component extends DCLogic {
       showCatEditor: false,
       rcEditing: {key:null,text:''},
       ibEditing: {key:null,text:''},
-      itemBudgets: {luz:1650,mecanico:600,rego:900,viajes:3000,otros:0},
+      itemBudgets: {luz:0,mecanico:0,rego:0,viajes:0,otros:0},
       darkMode: false,
       closedMonths: {},
       settingsMsg: '',
@@ -2757,10 +2756,10 @@ class Component extends DCLogic {
     const budgets={}; [...this.fixed,...this.variable].forEach(c=>{budgets[c.id]=c.budget;});
     const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
     const methods=this.pm.map(m=>({...m,inicial:0,saldoReal:0}));
-    const recurringConfig={luz:{amount:380,interval:3},rego:{amount:850,interval:6},mecanico:{amount:600,interval:12}};
-    const fixedDefs=[{id:'renta',name:'Renta',budget:2200},{id:'internet',name:'Internet',budget:80},{id:'salud',name:'Seguro Médico',budget:180},{id:'celular',name:'Celular · Telstra',budget:65},{id:'seguroauto',name:'Seguro Auto',budget:120},{id:'corte',name:'Corte de Pelo',budget:40}];
-    const recurringDefs=[{id:'luz',name:'Luz',amount:380,interval:3},{id:'rego',name:'REGO',amount:850,interval:6},{id:'mecanico',name:'Mecánico Auto',amount:600,interval:12}];
-    const variableDefs=[{id:'desayuno',name:'Desayuno',group:'Comida',budget:60},{id:'almuerzo',name:'Almuerzo',group:'Comida',budget:200},{id:'cena',name:'Cena',group:'Comida',budget:150},{id:'comidas',name:'Comidas fuera',group:'Comida',budget:180},{id:'super',name:'Supermercado',group:'Comida',budget:600},{id:'bencina',name:'Bencina',group:'Transporte',budget:220},{id:'estac',name:'Estacionamiento',group:'Transporte',budget:60},{id:'peajes',name:'Peajes',group:'Transporte',budget:40},{id:'uber',name:'Uber',group:'Transporte',budget:80},{id:'transporte',name:'Transporte ciudad',group:'Transporte',budget:50},{id:'otroscasa',name:'Otros · Casa',group:'Personal',budget:120},{id:'otrospers',name:'Otros · Personal',group:'Personal',budget:100},{id:'regalos',name:'Regalos',group:'Personal',budget:80},{id:'libros',name:'Libros',group:'Personal',budget:40},{id:'ropa',name:'Ropa',group:'Personal',budget:120},{id:'viajes',name:'Viajes',group:'Personal',budget:250}];
+    const recurringConfig={luz:{amount:0,interval:3},rego:{amount:0,interval:6},mecanico:{amount:0,interval:12}};
+    const fixedDefs=[{id:'renta',name:'Renta',budget:0},{id:'internet',name:'Internet',budget:0},{id:'salud',name:'Seguro Médico',budget:0},{id:'celular',name:'Celular · Telstra',budget:0},{id:'seguroauto',name:'Seguro Auto',budget:0},{id:'corte',name:'Corte de Pelo',budget:0}];
+    const recurringDefs=[{id:'luz',name:'Luz',amount:0,interval:3},{id:'rego',name:'REGO',amount:0,interval:6},{id:'mecanico',name:'Mecánico Auto',amount:0,interval:12}];
+    const variableDefs=[{id:'desayuno',name:'Desayuno',group:'Comida',budget:0},{id:'almuerzo',name:'Almuerzo',group:'Comida',budget:0},{id:'cena',name:'Cena',group:'Comida',budget:0},{id:'comidas',name:'Comidas fuera',group:'Comida',budget:0},{id:'super',name:'Supermercado',group:'Comida',budget:0},{id:'bencina',name:'Bencina',group:'Transporte',budget:0},{id:'estac',name:'Estacionamiento',group:'Transporte',budget:0},{id:'peajes',name:'Peajes',group:'Transporte',budget:0},{id:'uber',name:'Uber',group:'Transporte',budget:0},{id:'transporte',name:'Transporte ciudad',group:'Transporte',budget:0},{id:'otroscasa',name:'Otros · Casa',group:'Personal',budget:0},{id:'otrospers',name:'Otros · Personal',group:'Personal',budget:0},{id:'regalos',name:'Regalos',group:'Personal',budget:0},{id:'libros',name:'Libros',group:'Personal',budget:0},{id:'ropa',name:'Ropa',group:'Personal',budget:0},{id:'viajes',name:'Viajes',group:'Personal',budget:0}];
     const variableGroups=['Comida','Transporte','Personal'];
     this.setState({expenses:[],budgets,methods,fixedPayments,itemMatrix:{luz:z12(),mecanico:z12(),rego:z12(),viajes:z12(),otros:z12()},caja:{ppto:z12(),final:z12(),pct:z12(),ingreso:z12()},monthComments:{},importedTotals:{},closedMonths:{},currency:'AUD',period:'mensual',tab:'inicio',fixedTab:'registro',importMsg:'',prorate:false,recurringConfig,fixedDefs,recurringDefs,variableDefs,variableGroups});
   }
@@ -3148,7 +3147,7 @@ class Component extends DCLogic {
       dailyBars, diaPromFmt:this.fmt0(diaProm), hoyFmt:this.fmt0(hoy), semanaFmt:this.fmt0(semana), catRows,
       rootRef:this.rootRef,
       isInicio:S.tab==='inicio', isDiario:S.tab==='diario', isPresup:S.tab==='presupuesto', isAnual:S.tab==='anual', isBanco:S.tab==='banco',
-      topKicker: ({inicio:'Mi presupuesto',diario:'Registro',presupuesto:'Plan mensual',banco:'Conciliación',anual:'Visión '+this.year})[S.tab],
+      topKicker: ({inicio:'Mi presupuesto',diario:'Registro',presupuesto:'Plan mensual',banco:'Conciliación',anual:String(this.year)})[S.tab],
       topTitle: ({inicio:'Resumen',diario:'Gastos diarios',presupuesto:'Presupuesto',banco:'Caja y banco',anual:'Resumen anual'})[S.tab],
       currency:S.currency, currencySymbol:S.currency==='AUD'?'A$':'$',
       toggleCurrency:()=>this.toggleCurrency(),
