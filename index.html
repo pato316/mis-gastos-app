@@ -1846,6 +1846,7 @@
               <div style="font-size:11.5px;color:var(--muted)">{{ it.catName }} · {{ it.pmName }}</div>
             </div>
             <span style="font-family:var(--fnum);font-size:13.5px;font-weight:600">{{ it.amountFmt }}</span>
+            <button onClick="{{ it.edit }}" style="width:24px;height:24px;border:none;background:none;color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px">✏</button>
             <button onClick="{{ it.del }}" style="width:24px;height:24px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px">×</button>
           </div>
         </sc-for>
@@ -1920,6 +1921,12 @@
 
       <button onClick="{{ openCatEditor }}" style="width:100%;margin-top:12px;padding:11px 0;border-radius:13px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer">✏ Personalizar categorías</button>
       <button onClick="{{ resetBudgets }}" style="width:100%;margin-top:8px;padding:11px 0;border-radius:13px;border:1.5px solid #b8472e;background:rgba(184,71,46,.06);color:#b8472e;font-size:13.5px;font-weight:600;cursor:pointer">🗑 Limpiar montos del presupuesto</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onClick="{{ exportBudget }}" style="flex:1;padding:11px 0;border-radius:13px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer">↑ Exportar</button>
+        <button onClick="{{ triggerImportBudget }}" style="flex:1;padding:11px 0;border-radius:13px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer">↓ Importar</button>
+      </div>
+      <sc-if value="{{ budgetMsg }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:13px;color:var(--accent);margin-top:6px">{{ budgetMsg }}</div></sc-if>
+      <input type="file" accept=".json" ref="{{ importBudgetRef }}" onChange="{{ onImportBudget }}" style="display:none"/>
 
       <!-- fijos -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 4px 10px">
@@ -2227,10 +2234,10 @@
               <div style="width:62px;flex:none;padding:8px 8px;text-align:right">Total</div>
             </div>
             <sc-for list="{{ monthMatrix }}" as="m" hint-placeholder-count="12">
-              <div onClick="{{ m.open }}" style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);cursor:pointer;background:{{ m.rowBg }}">
-                <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if><sc-if value="{{ m.isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;flex:none">🔒</span></sc-if></div>
+              <div style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);background:{{ m.rowBg }}">
+                <div onClick="{{ m.open }}" style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if><sc-if value="{{ m.isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;flex:none">🔒</span></sc-if></div>
                 <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
-                  <div style="flex:1;padding:9px 4px;text-align:right;color:{{ c.color }}">{{ c.txt }}</div>
+                  <input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="flex:1;width:0;min-width:0;padding:9px 4px;text-align:right;color:{{ c.color }};background:transparent;border:none;font-family:var(--fnum);font-size:10px"/>
                 </sc-for>
                 <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:600">{{ m.totFmt }}</div>
               </div>
@@ -2396,7 +2403,7 @@
     <div style="position:absolute;left:0;right:0;bottom:0;z-index:31;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 22px 28px;animation:sheetUp .28s cubic-bezier(.2,.8,.2,1);max-height:88%;display:flex;flex-direction:column">
       <div style="width:38px;height:4px;border-radius:99px;background:var(--cb);margin:6px auto 14px;flex:none"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex:none">
-        <div style="font-size:18px;font-weight:600">Nuevo gasto</div>
+        <div style="font-size:18px;font-weight:600">{{ draftIsEdit ? 'Editar gasto' : 'Nuevo gasto' }}</div>
         <button onClick="{{ closeAdd }}" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">×</button>
       </div>
 
@@ -2409,13 +2416,16 @@
 
       <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--cb);border-radius:12px;padding:11px 16px;margin-top:10px;flex:none">
         <span style="font-size:14px;color:var(--muted)">Fecha</span>
-        <input type="date" value="{{ draftDate }}" onInput="{{ onDate }}" style="font-family:var(--fnum);font-size:14px;font-weight:600;text-align:right"/>
+        <div style="display:flex;align-items:center;gap:8px">
+          <sc-if value="{{ !draftDateIsToday }}" hint-placeholder-val="{{ false }}"><button onClick="{{ resetToToday }}" style="font-size:11px;font-weight:600;color:var(--accent);background:rgba(47,107,216,.1);border:none;border-radius:8px;padding:4px 8px;cursor:pointer">Hoy</button></sc-if>
+          <input type="date" value="{{ draftDate }}" onInput="{{ onDate }}" style="font-family:var(--fnum);font-size:14px;font-weight:600;text-align:right"/>
+        </div>
       </div>
 
-      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 2px 10px;flex:none">Medio de pago</div>
-      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;flex:none">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 2px 8px;flex:none">Medio de pago</div>
+      <div style="display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;margin-bottom:4px;flex:none;-webkit-overflow-scrolling:touch;scrollbar-width:none">
         <sc-for list="{{ pmChips }}" as="pc" hint-placeholder-count="4">
-          <button onClick="{{ pc.pick }}" style="padding:9px 13px;border-radius:11px;border:1.5px solid {{ pc.border }};background:{{ pc.bg }};color:{{ pc.fg }};font-size:13px;font-weight:500;cursor:pointer">{{ pc.name }}</button>
+          <button onClick="{{ pc.pick }}" style="padding:8px 11px;border-radius:11px;border:1.5px solid {{ pc.border }};background:{{ pc.bg }};color:{{ pc.fg }};font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;flex:none">{{ pc.name }}</button>
         </sc-for>
       </div>
 
@@ -2576,6 +2586,7 @@ class Component extends DCLogic {
     const caja={ppto:z12(),final:z12(),pct:z12(),ingreso:z12()};
     this.fileRef=React.createRef();
     this.importAllRef=React.createRef();
+    this.importBudgetRef=React.createRef();
     const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
     this._lsKey='gastos_app_v4';
 
@@ -2604,7 +2615,10 @@ class Component extends DCLogic {
       showCatEditor: false,
       rcEditing: {key:null,text:''},
       ibEditing: {key:null,text:''},
+      imEditing: {key:null,text:''},
       itemBudgets: {luz:0,mecanico:0,rego:0,viajes:0,otros:0},
+      editingExpense: null,
+      budgetMsg: '',
       darkMode: false,
       closedMonths: {},
       settingsMsg: '',
@@ -2695,15 +2709,49 @@ class Component extends DCLogic {
   toggleCurrency(){ this.setState(s=>({currency:s.currency==='AUD'?'CLP':'AUD'})); }
   setDraft(f,v){ this.setState(s=>({draft:{...s.draft,[f]:v}})); }
   deleteExpense(id){ this.setState(s=>({expenses:s.expenses.filter(e=>e.id!==id)})); }
+  openEdit(id){
+    const e=this.state.expenses.find(x=>x.id===id); if(!e) return;
+    this.setState({showAdd:true,draft:{amount:String(e.amount),cat:e.cat,label:e.label||'',date:e.date,pm:e.pm||'amex'},editingExpense:id});
+  }
   saveExpense(){
     this._syncCats();
     const d=this.state.draft; const amt=parseFloat(String(d.amount).replace(',','.'));
     if(!(amt>0)) return;
     const rec=this.recurring.find(r=>r.id===d.cat);
-    const label=(d.label||'').trim()||this.cat[d.cat].name;
-    const ex={id:'u'+Date.now(),date:d.date,cat:d.cat,label,amount:amt,rec:rec?d.cat:undefined,pm:d.pm};
-    this.setState(s=>({expenses:[...s.expenses,ex],draft:{...s.draft,amount:'',label:''},showAdd:false}));
+    const label=(d.label||'').trim()||(this.cat[d.cat]?.name||d.cat);
+    if(this.state.editingExpense){
+      const orig=this.state.expenses.find(e=>e.id===this.state.editingExpense);
+      const updated={...orig,date:d.date,cat:d.cat,label,amount:amt,rec:rec?d.cat:undefined,pm:d.pm};
+      this.setState(s=>({expenses:s.expenses.map(e=>e.id===s.editingExpense?updated:e),draft:{...s.draft,amount:'',label:''},showAdd:false,editingExpense:null}));
+    } else {
+      const ex={id:'u'+Date.now(),date:d.date,cat:d.cat,label,amount:amt,rec:rec?d.cat:undefined,pm:d.pm};
+      this.setState(s=>({expenses:[...s.expenses,ex],draft:{...s.draft,amount:'',label:''},showAdd:false}));
+    }
   }
+  exportBudget(){
+    const S=this.state;
+    const data={budgets:S.budgets,fixedDefs:S.fixedDefs,recurringDefs:S.recurringDefs,variableDefs:S.variableDefs,variableGroups:S.variableGroups,itemBudgets:S.itemBudgets,recurringConfig:S.recurringConfig};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='presupuesto-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  }
+  triggerImportBudget(){ if(this.importBudgetRef.current) this.importBudgetRef.current.click(); }
+  async onImportBudget(e){
+    const file=e.target.files&&e.target.files[0]; e.target.value=''; if(!file) return;
+    try{
+      const s=JSON.parse(await file.text()); const upd={};
+      if(s.budgets&&typeof s.budgets==='object') upd.budgets=s.budgets;
+      if(Array.isArray(s.fixedDefs)) upd.fixedDefs=s.fixedDefs;
+      if(Array.isArray(s.recurringDefs)) upd.recurringDefs=s.recurringDefs;
+      if(Array.isArray(s.variableDefs)) upd.variableDefs=s.variableDefs;
+      if(Array.isArray(s.variableGroups)) upd.variableGroups=s.variableGroups;
+      if(s.itemBudgets&&typeof s.itemBudgets==='object') upd.itemBudgets=s.itemBudgets;
+      if(s.recurringConfig&&typeof s.recurringConfig==='object') upd.recurringConfig=s.recurringConfig;
+      upd.budgetMsg='✓ Presupuesto importado'; this.setState(upd);
+      setTimeout(()=>this.setState({budgetMsg:''}),3000);
+    }catch(err){ this.setState({budgetMsg:'⚠ Archivo inválido'}); setTimeout(()=>this.setState({budgetMsg:''}),3000); }
+  }
+  setImEdit(key,text){ this.setState({imEditing:{key,text}}); }
+  setItemMatrixCell(itemId,mi,raw){ const v=parseFloat(String(raw).replace(/[^0-9.]/g,'')); if(isNaN(v)||v<0) return; this.setState(s=>{const im={...s.itemMatrix}; im[itemId]=im[itemId].slice(); im[itemId][mi]=Math.round(v); return {itemMatrix:im};}); }
   nextDue(c){ let m=c.due.find(x=>x>=this.curMonth); let yr=this.year; if(m===undefined){ m=c.due[0]; yr=this.year+1; } return this.monthAbbr[m]+' '+yr; }
   pmName(id){ const m=this.state.methods.find(x=>x.id===id); return m?m.name:'—'; }
   setMethod(id,field,raw){ let v=parseFloat(String(raw).replace(/[^0-9.\-]/g,'')); if(isNaN(v))v=0; const aud=v/(this.state.currency==='AUD'?1:this.rate); this.setState(s=>({methods:s.methods.map(m=>m.id===id?{...m,[field]:aud}:m)})); }
@@ -2947,7 +2995,7 @@ class Component extends DCLogic {
     const byDate={};
     md.exps.forEach(e=>{(byDate[e.date]=byDate[e.date]||[]).push(e);});
     const groups=Object.keys(byDate).sort().reverse().map(dt=>{
-      const items=byDate[dt].slice().sort((a,b)=>a.id<b.id?1:-1).map(e=>{const ct=this.cat[e.cat]||{name:e.cat,color:'#9ca3af',group:'Variables'};return{label:e.label,catName:ct.name,color:ct.color,amountFmt:this.fmt(e.amount),recurring:!!e.rec,pmName:this.pmName(e.pm),icon:this.icon(ct.group),del:()=>this.deleteExpense(e.id)};});
+      const items=byDate[dt].slice().sort((a,b)=>a.id<b.id?1:-1).map(e=>{const ct=this.cat[e.cat]||{name:e.cat,color:'#9ca3af',group:'Variables'};return{label:e.label,catName:ct.name,color:ct.color,amountFmt:this.fmt(e.amount),recurring:!!e.rec,pmName:this.pmName(e.pm),icon:this.icon(ct.group),del:()=>this.deleteExpense(e.id),edit:()=>this.openEdit(e.id)};});
       const tot=byDate[dt].reduce((s,e)=>s+e.amount,0);
       const [y,m,d]=dt.split('-').map(Number); const wd=this.weekdays[new Date(y,m-1,d).getDay()];
       return {head:dt===this.today?'Hoy':wd, sub:d+' '+this.monthAbbr[m-1].toLowerCase(), totalFmt:this.fmt(tot), items};
@@ -3087,7 +3135,7 @@ class Component extends DCLogic {
     const difTot=gastoAnoTot>0?presupTot-gastoAnoTot:0, difMes=difTot/12;
     const itemHeader=its.map(it=>({short:it.short,color:it.color}));
     const monthMatrix=[]; for(let mi=0;mi<12;mi++){
-      const cells=its.map(it=>{const v=im[it.id][mi];return {txt:v?this.fmt0(v):'·',color:v?'var(--ink)':'#c5cedb'};});
+      const cells=its.map(it=>{const v=im[it.id][mi]; const key=it.id+'_'+mi; const isEd=S.imEditing?.key===key; return {txt:v?this.fmt0(v):'·',color:v?'var(--ink)':'#c5cedb',key,val:isEd?S.imEditing.text:(v||''),onFocus:e=>this.setImEdit(key,String(e.target.value)),onInput:e=>{this.setImEdit(key,e.target.value);this.setItemMatrixCell(it.id,mi,e.target.value);},onBlur:()=>this.setState({imEditing:{key:null,text:''}})};});
       const tot=its.reduce((a,it)=>a+im[it.id][mi],0);
       monthMatrix.push({abbr:this.monthAbbr[mi],cells,totFmt:tot?this.fmt0(tot):'·',hasComment:!!S.monthComments[mi],isClosed:!!S.closedMonths[mi],rowBg:mi===this.curMonth?'rgba(47,107,216,.06)':'transparent',open:()=>this.setState({showMonth:mi})});
     }
@@ -3156,7 +3204,7 @@ class Component extends DCLogic {
       deleteMonthOpts:(this.monthFull||[]).map((n,i)=>({label:n,sel:S.deleteMonth===i,pick:()=>this.setState({deleteMonth:i}),selBd:S.deleteMonth===i?'var(--accent)':'var(--cb)',selBg:S.deleteMonth===i?'var(--accent)':'var(--card)',selFg:S.deleteMonth===i?'#fff':'var(--ink)'})),
       doDeleteMonth:()=>this.resetMonth(S.deleteMonth),
       doDeleteAll:()=>this.resetAll(),
-      openAdd:()=>this.setState({showAdd:true}), closeAdd:()=>this.setState({showAdd:false}),
+      openAdd:()=>this.setState({showAdd:true}), closeAdd:()=>this.setState({showAdd:false,editingExpense:null}),
       showSettings:S.showSettings, showAdd:S.showAdd,
       showFab:S.tab==='inicio'||S.tab==='diario',
       goInicio:()=>this.setTab('inicio'), goDiario:()=>this.setTab('diario'), goPresup:()=>this.setTab('presupuesto'), goAnual:()=>this.setTab('anual'), goBanco:()=>this.setTab('banco'),
@@ -3234,11 +3282,19 @@ class Component extends DCLogic {
       exportData:()=>this.exportData(), triggerImportAll:()=>this.triggerImportAll(),
       settingsMsg:S.settingsMsg,
 
-      // add
+      // add / edit expense
       draftAmount:S.draft.amount, draftLabel:S.draft.label, draftDate:S.draft.date,
       onAmount:(e)=>this.setDraft('amount',e.target.value), onLabel:(e)=>this.setDraft('label',e.target.value), onDate:(e)=>this.setDraft('date',e.target.value),
+      draftIsEdit:!!S.editingExpense,
+      draftDateIsToday:S.draft.date===this.today,
+      resetToToday:()=>this.setDraft('date',this.today),
       addGroups, draftRecurring,
       catEdFixes, catEdRecurr, catEdGroups,
+
+      // budget export/import
+      exportBudget:()=>this.exportBudget(), triggerImportBudget:()=>this.triggerImportBudget(),
+      importBudgetRef:this.importBudgetRef, onImportBudget:(e)=>this.onImportBudget(e),
+      budgetMsg:S.budgetMsg,
       resetBudgets:()=>this.resetBudgets(),
       openCatEditor:()=>this.setState({showCatEditor:true}),
       closeCatEditor:()=>this.setState({showCatEditor:false}),
