@@ -1629,7 +1629,19 @@ class Component extends DCLogic {
     const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
     const balanceCajaAnual=cajaFinalAnualTot;
-    const pctCajaProyectado=cajaPptoTot>0?Math.round(cajaFinalAnualTot/cajaPptoTot*100):0;
+    // projected caja final: past months use actuals, future months use plan
+    let projectedCaja=0;
+    for(let mi=0;mi<12;mi++){
+      const mTot=its.reduce((a,it)=>a+(im[it.id][mi]||0),0);
+      const plannedCaja=(cj.ppto[mi]||0)-mTot+(cj.ingreso[mi]||0);
+      if(mi<=this.curMonth){
+        const actualItemSpend=its.reduce((a,it)=>a+itemActuals[it.id][mi],0);
+        const actualNonItem=this.monthData(mi).realActual;
+        projectedCaja+=(cj.ppto[mi]||0)-actualNonItem-actualItemSpend+(cj.ingreso[mi]||0);
+      } else { projectedCaja+=plannedCaja; }
+    }
+    const difProyectado=projectedCaja-cajaFinalAnualTot;
+    const pctCajaProyectado=cajaPptoTot>0?Math.round(difProyectado/cajaPptoTot*100):0;
 
     // ---- fixed payments tab ----
     const fp=S.fixedPayments;
@@ -1725,7 +1737,7 @@ class Component extends DCLogic {
       yearLabel:String(this.year),
       ytdActualFmt:this.fmt0(ytdA), ytdBudgetFmt:this.fmt0(ytdBudget), ytdBar:Math.min(100,ytdA/ytdBudget*100), ytdColor:this.sHex(ytdA/ytdBudget*100), ytdPct,
       ytdRemainLabel:ytdA<=ytdBudget?'Ahorrado':'Excedido', ytdRemainFmt:this.fmt0(Math.abs(ytdBudget-ytdA)),
-      months, projectedFmt:this.fmt0(projected), projColor2:projected>annualBudget?'#b8472e':'#3f8f63',
+      months, projectedFmt:(difProyectado>=0?'+':'-')+this.fmt0(Math.abs(difProyectado)), projColor2:difProyectado>=0?'#3f8f63':'#b8472e',
       recurringTimeline, monthTicks:['E','F','M','A','M','J','J','A','S','O','N','D'],
       itemHeader, monthMatrix, itemFooter,
       gastoAnoTotFmt:this.fmt0(gastoAnoTot), presupTotFmt:this.fmt0(presupTot),
