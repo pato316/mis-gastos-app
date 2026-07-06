@@ -664,29 +664,32 @@
       <div style="font-size:11.5px;color:var(--muted);margin:0 4px 12px">Caja final y % de cada mes (editable, en A$). Se combinan con los gastos no mensuales de arriba para el balance anual.</div>
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:14px;overflow:hidden">
         <div style="overflow-x:auto">
-          <div style="min-width:420px">
+          <div style="min-width:520px">
             <div style="display:flex;background:var(--subtle);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;color:var(--muted)">
               <div style="width:44px;flex:none;padding:8px 6px">Mes</div>
               <div style="flex:1;padding:8px 4px;text-align:right">Caja ppto</div>
-              <div style="width:46px;flex:none;padding:8px 4px;text-align:right">%</div>
-              <div style="flex:1;padding:8px 4px;text-align:right">Caja final</div>
+              <div style="width:42px;flex:none;padding:8px 4px;text-align:right">%</div>
+              <div style="flex:1;padding:8px 4px;text-align:right">Caja gasto</div>
               <div style="flex:1;padding:8px 4px;text-align:right">Ing. extra</div>
+              <div style="flex:1;padding:8px 4px;text-align:right;color:var(--accent)">Caja final</div>
             </div>
             <sc-for list="{{ cajaRows }}" as="r" hint-placeholder-count="12">
               <div style="display:flex;align-items:center;border-top:1px solid var(--cb)">
                 <div style="width:44px;flex:none;padding:7px 6px;font-size:11px;font-weight:600">{{ r.abbr }}</div>
                 <div style="flex:1;padding:4px 4px"><input value="{{ r.pptoV }}" onInput="{{ r.pptoI }}" onFocus="{{ r.pptoF }}" onBlur="{{ r.pptoB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 5px"/></div>
-                <div style="width:46px;flex:none;padding:4px 3px"><input value="{{ r.pctV }}" onInput="{{ r.pctI }}" onFocus="{{ r.pctF }}" onBlur="{{ r.pctB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 3px"/></div>
-                <div style="flex:1;padding:9px 4px;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;color:var(--accent)">{{ r.finalFmt }}</div>
+                <div style="width:42px;flex:none;padding:4px 3px"><input value="{{ r.pctV }}" onInput="{{ r.pctI }}" onFocus="{{ r.pctF }}" onBlur="{{ r.pctB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 3px"/></div>
+                <div style="flex:1;padding:9px 4px;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;color:var(--muted)">{{ r.gastoFmt }}</div>
                 <div style="flex:1;padding:4px 4px"><input value="{{ r.ingV }}" onInput="{{ r.ingI }}" onFocus="{{ r.ingF }}" onBlur="{{ r.ingB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 5px"/></div>
+                <div style="flex:1;padding:9px 4px;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;color:var(--accent)">{{ r.cajaFinalFmt }}</div>
               </div>
             </sc-for>
             <div style="display:flex;align-items:center;border-top:2px solid var(--cb);background:var(--subtle);font-family:var(--fnum);font-size:10px;font-weight:700">
               <div style="width:44px;flex:none;padding:9px 6px;font-family:var(--fui)">Año</div>
               <div style="flex:1;padding:9px 4px;text-align:right">{{ cajaPptoTotFmt }}</div>
-              <div style="width:46px;flex:none;padding:9px 3px;text-align:right">{{ pctAnual }}%</div>
-              <div style="flex:1;padding:9px 4px;text-align:right;color:var(--accent)">{{ cajaFinalTotFmt }}</div>
+              <div style="width:42px;flex:none;padding:9px 3px;text-align:right">{{ pctAnual }}%</div>
+              <div style="flex:1;padding:9px 4px;text-align:right;color:var(--muted)">{{ cajaGastoTotFmt }}</div>
               <div style="flex:1;padding:9px 4px;text-align:right">{{ ingresoTotFmt }}</div>
+              <div style="flex:1;padding:9px 4px;text-align:right;color:var(--accent)">{{ cajaFinalAnualFmt }}</div>
             </div>
           </div>
         </div>
@@ -696,9 +699,10 @@
         <div style="font-size:12px;color:var(--muted)">Balance de caja anual</div>
         <div style="font-family:var(--fnum);font-size:25px;font-weight:600;margin-top:3px;color:{{ balanceCajaColor }}">{{ balanceCajaAnualFmt }}</div>
         <div style="margin-top:13px;border-top:1px solid var(--cb);padding-top:11px;display:flex;flex-direction:column;gap:7px;font-size:12px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Σ Caja final (12 meses)</span><b style="font-family:var(--fnum)">{{ cajaFinalTotFmt }}</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Σ Caja gasto (12 meses)</span><b style="font-family:var(--fnum)">{{ cajaGastoTotFmt }}</b></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">+ Ingresos extra</span><b style="font-family:var(--fnum);color:#3f8f63">{{ ingresoTotFmt }}</b></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">− Gastos no mensuales (ítems)</span><b style="font-family:var(--fnum);color:#b8472e">{{ gastoAnoTotFmt }}</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">= Caja final anual</span><b style="font-family:var(--fnum);color:var(--accent)">{{ cajaFinalAnualFmt }}</b></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--cb);padding-top:7px"><span style="color:var(--muted)">% cumplimiento proyectado</span><b style="font-family:var(--fnum);color:{{ pctCajaProyectado>=100?'#3f8f63':pctCajaProyectado>=80?'#c08a2e':'#b8472e' }}">{{ pctCajaProyectado }}%</b></div>
         </div>
       </div>
       <div style="height:8px"></div>
@@ -793,7 +797,7 @@
         </button>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Borra gastos, medios de pago, tabla anual y caja. Pide confirmación.</div>
       </div>
-      <div style="margin-top:20px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.3px">v1.5 · Jul 2026</div>
+      <div style="margin-top:20px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.3px">{{ appVersion }} · Jul 2026</div>
     </div>
   </sc-if>
 
@@ -1580,15 +1584,17 @@ class Component extends DCLogic {
     const itemFooter=its.map(it=>{const ib=S.itemBudgets?.[it.id]??it.budget; const k=it.id+'_ppto'; const isEd=S.ibEditing?.key===k; const dif=ib-itemGasto[it.id]; return{gastoFmt:this.fmt0(itemGasto[it.id]),presupV:isEd?S.ibEditing.text:String(ib),presupFmt:this.fmt0(ib),presupFocus:e=>this.setIbEdit(k,e.target.value),presupInput:e=>{this.setIbEdit(k,e.target.value);this.setItemBudget(it.id,e.target.value);},presupBlur:()=>this.setState({ibEditing:{key:null,text:''}}),difFmt:(dif<0?'−':'+')+this.fmt0(Math.abs(dif)),difColor:dif<0?'#b8472e':'#3f8f63'};});
     // ---- balance de caja mensual ----
     const cj=S.caja;
-    const cajaRows=[]; let cajaFinalTot=0; for(let mi=0;mi<12;mi++){
+    const cajaRows=[]; let cajaGastoTot=0, cajaFinalAnualTot=0; for(let mi=0;mi<12;mi++){
       const ep=mkEdit('cj_p_'+mi,String(cj.ppto[mi]||0),(t)=>this.setCaja('ppto',mi,t));
       const ec=mkEdit('cj_pc_'+mi,String(cj.pct[mi]||0),(t)=>this.setCaja('pct',mi,t));
       const ei=mkEdit('cj_i_'+mi,String(cj.ingreso[mi]||0),(t)=>this.setCaja('ingreso',mi,t));
       const mTot=its.reduce((a,it)=>a+(im[it.id][mi]||0),0);
-      const finalVal=(cj.ppto[mi]||0)-mTot; cajaFinalTot+=finalVal;
+      const gastoVal=(cj.ppto[mi]||0)-mTot; cajaGastoTot+=gastoVal;
+      const finalVal=gastoVal+(cj.ingreso[mi]||0); cajaFinalAnualTot+=finalVal;
       cajaRows.push({abbr:this.monthAbbr[mi],
         pptoV:ep.value,pptoF:ep.onFocus,pptoI:ep.onInput,pptoB:ep.onBlur,
-        finalFmt:this.fmt0(finalVal),
+        gastoFmt:this.fmt0(gastoVal),
+        cajaFinalFmt:this.fmt0(finalVal),
         pctV:ec.value,pctF:ec.onFocus,pctI:ec.onInput,pctB:ec.onBlur,
         ingV:ei.value,ingF:ei.onFocus,ingI:ei.onInput,ingB:ei.onBlur,
       });
@@ -1596,7 +1602,8 @@ class Component extends DCLogic {
     const sumA=(a)=>a.reduce((x,y)=>x+(y||0),0);
     const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
-    const balanceCajaAnual=cajaFinalTot+ingresoTot-gastoAnoTot;
+    const balanceCajaAnual=cajaFinalAnualTot;
+    const pctCajaProyectado=cajaPptoTot>0?Math.round(cajaFinalAnualTot/cajaPptoTot*100):0;
 
     // ---- fixed payments tab ----
     const fp=S.fixedPayments;
@@ -1698,8 +1705,9 @@ class Component extends DCLogic {
       gastoAnoTotFmt:this.fmt0(gastoAnoTot), presupTotFmt:this.fmt0(presupTot),
       difTotFmt:(difTot<0?'−':'+')+this.fmt0(Math.abs(difTot)), difTotColor:difTot<0?'#b8472e':'#3f8f63',
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
-      cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaFinalTotFmt:this.fmt0(cajaFinalTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual,
+      cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaGastoTotFmt:this.fmt0(cajaGastoTot), cajaFinalAnualFmt:this.fmt0(cajaFinalAnualTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual, pctCajaProyectado,
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
+      appVersion:'v1.6',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
