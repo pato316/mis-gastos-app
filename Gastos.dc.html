@@ -635,7 +635,7 @@
               <div style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);background:{{ m.rowBg }}">
                 <div onClick="{{ m.open }}" style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if><sc-if value="{{ m.isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;flex:none">🔒</span></sc-if></div>
                 <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
-                  <input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="flex:1;width:0;min-width:0;padding:9px 4px;text-align:right;color:{{ c.color }};background:transparent;border:none;font-family:var(--fnum);font-size:10px"/>
+                  <div style="flex:1;padding:4px 3px"><input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:{{ c.color }}"/></div>
                 </sc-for>
                 <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:600">{{ m.totFmt }}</div>
               </div>
@@ -890,7 +890,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
           Importar mes
         </button>
-        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--ink)' }};font-size:13px;font-weight:600;cursor:pointer">{{ monthIsClosed ? '🔒 Cerrado' : '📌 Cerrar mes' }}</button>
+        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--ink)' }};font-size:13px;font-weight:600;cursor:pointer"><sc-if value="{{ monthIsClosed }}" hint-placeholder-val="{{ false }}">🔒 Cerrado</sc-if><sc-if value="{{ !monthIsClosed }}" hint-placeholder-val="{{ true }}">📌 Cerrar mes</sc-if></button>
       </div>
       <sc-if value="{{ importMsg }}" hint-placeholder-val="{{ false }}">
         <div style="font-size:12px;color:var(--accent);font-weight:500;margin-top:10px;flex:none;text-align:center">{{ importMsg }}</div>
