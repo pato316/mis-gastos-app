@@ -3185,7 +3185,7 @@ class Component extends DCLogic {
       const ec=mkEdit('cj_pc_'+mi,String(cj.pct[mi]||0),(t)=>this.setCaja('pct',mi,t));
       const ei=mkEdit('cj_i_'+mi,String(cj.ingreso[mi]||0),(t)=>this.setCaja('ingreso',mi,t));
       const mTot=its.reduce((a,it)=>a+(im[it.id][mi]||0),0);
-      const finalVal=(cj.ppto[mi]||0)+mTot; cajaFinalTot+=finalVal;
+      const finalVal=(cj.ppto[mi]||0)-mTot; cajaFinalTot+=finalVal;
       cajaRows.push({abbr:this.monthAbbr[mi],
         pptoV:ep.value,pptoF:ep.onFocus,pptoI:ep.onInput,pptoB:ep.onBlur,
         finalFmt:this.fmt0(finalVal),
