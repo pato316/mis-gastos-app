@@ -1692,13 +1692,29 @@
       <div style="display:flex;gap:9px;margin-top:10px">
         <div style="flex:1;background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:13px 14px">
           <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Disponible fijo</div>
-          <div style="font-family:var(--fnum);font-size:17px;font-weight:600;margin-top:4px;color:{{ fixAvailColor }}">{{ fixAvailFmt }}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">de {{ fixBudgetFmt }}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+            <svg width="48" height="48" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="var(--subtle)" stroke-width="5"/>
+              <circle cx="18" cy="18" r="14" fill="none" stroke="{{ fixAvailColor }}" stroke-width="5" stroke-dasharray="{{ fixPieDash }}" stroke-dashoffset="-21.99" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+            </svg>
+            <div>
+              <div style="font-family:var(--fnum);font-size:17px;font-weight:600;color:{{ fixAvailColor }}">{{ fixAvailFmt }}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">de {{ fixBudgetFmt }}</div>
+            </div>
+          </div>
         </div>
         <div style="flex:1;background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:13px 14px">
           <div style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Disponible variable</div>
-          <div style="font-family:var(--fnum);font-size:17px;font-weight:600;margin-top:4px;color:{{ varAvailColor }}">{{ varAvailFmt }}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">de {{ varBudgetFmt }}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+            <svg width="48" height="48" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="var(--subtle)" stroke-width="5"/>
+              <circle cx="18" cy="18" r="14" fill="none" stroke="{{ varAvailColor }}" stroke-width="5" stroke-dasharray="{{ varPieDash }}" stroke-dashoffset="-21.99" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+            </svg>
+            <div>
+              <div style="font-family:var(--fnum);font-size:17px;font-weight:600;color:{{ varAvailColor }}">{{ varAvailFmt }}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">de {{ varBudgetFmt }}</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1867,24 +1883,33 @@
         <sc-for list="{{ fixedPayList }}" as="fp" hint-placeholder-count="6">
           <div style="background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:14px 16px;margin-bottom:10px">
             <div style="display:flex;align-items:center;gap:12px">
-              <button onClick="{{ fp.toggle }}" style="width:24px;height:24px;border-radius:7px;border:1.5px solid {{ fp.checkBd }};background:{{ fp.checkBg }};flex:none;cursor:pointer;display:flex;align-items:center;justify-content:center">
-                <sc-if value="{{ fp.done }}" hint-placeholder-val="{{ false }}">
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </sc-if>
-              </button>
               <div style="flex:1">
                 <div style="font-size:14px;font-weight:600">{{ fp.name }}</div>
                 <div style="display:flex;align-items:center;gap:4px;margin-top:5px">
                   <span style="font-size:11px;color:var(--muted)">{{ currencySymbol }}</span>
                   <input value="{{ fp.amtVal }}" onFocus="{{ fp.amtFocus }}" onInput="{{ fp.amtInput }}" onBlur="{{ fp.amtBlur }}" inputmode="decimal" style="font-family:var(--fnum);font-size:12px;font-weight:600;width:68px;background:var(--subtle);border-radius:7px;padding:4px 7px;color:var(--ink)"/>
                   <span style="font-size:11px;color:var(--muted)">/mes</span>
+                  <sc-if value="{{ fp.cuotas > 1 }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;color:var(--muted);margin-left:4px">· {{ fp.perCuotaFmt }} c/u</span></sc-if>
                 </div>
               </div>
               <sc-if value="{{ fp.done }}" hint-placeholder-val="{{ false }}">
                 <span style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(47,107,216,.12);padding:3px 9px;border-radius:6px">✓ Pagado</span>
               </sc-if>
             </div>
-            <sc-if value="{{ fp.done }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <sc-for list="{{ fp.cuotaBoxes }}" as="c" hint-placeholder-count="2">
+                <button onClick="{{ c.toggle }}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1.5px solid {{ c.checkBd }};background:{{ c.checkBg }};cursor:pointer">
+                  <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+                    <svg width="11" height="9" viewBox="0 0 12 10" fill="none"><polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </sc-if>
+                  <sc-if value="{{ !c.on }}" hint-placeholder-val="{{ true }}">
+                    <div style="width:11px;height:9px"></div>
+                  </sc-if>
+                  <span style="font-size:11px;font-weight:600;color:{{ c.on ? '#fff' : 'var(--ink)' }}">{{ c.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ fp.anyDone }}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--cb);display:flex;flex-direction:column;gap:10px">
                 <div style="display:flex;align-items:center;gap:10px">
                   <div style="font-size:11px;font-weight:600;color:var(--muted);min-width:76px">Fecha pago</div>
@@ -2014,9 +2039,15 @@
 
           <div style="font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Gastos fijos</div>
           <sc-for list="{{ catEdFixes }}" as="cf" hint-placeholder-count="6">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-              <input value="{{ cf.name }}" onInput="{{ cf.onName }}" placeholder="Nombre" style="flex:1;padding:8px 10px;border:1px solid var(--cb);border-radius:10px;font-size:13px;background:var(--bg);color:var(--fg)"/>
-              <button onClick="{{ cf.onDel }}" style="padding:8px 11px;border:none;background:rgba(184,71,46,.12);color:#b8472e;border-radius:10px;font-size:14px;cursor:pointer">✕</button>
+            <div style="margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <input value="{{ cf.name }}" onInput="{{ cf.onName }}" placeholder="Nombre" style="flex:1;padding:8px 10px;border:1px solid var(--cb);border-radius:10px;font-size:13px;background:var(--bg);color:var(--fg)"/>
+                <button onClick="{{ cf.onDel }}" style="padding:8px 11px;border:none;background:rgba(184,71,46,.12);color:#b8472e;border-radius:10px;font-size:14px;cursor:pointer">✕</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:6px">
+                <span style="font-size:11px;color:var(--muted)">Cuotas/mes</span>
+                <input type="number" min="1" max="6" value="{{ cf.cuotas }}" onInput="{{ cf.onCuotas }}" style="width:44px;font-size:12px;font-weight:600;text-align:center;background:var(--subtle);border:none;border-radius:7px;padding:5px 6px;color:var(--ink)"/>
+              </div>
             </div>
           </sc-for>
           <button onClick="{{ addFixedCat }}" style="width:100%;padding:9px;border:1.5px dashed var(--cb);background:none;color:var(--muted);border-radius:10px;font-size:13px;cursor:pointer;margin-bottom:22px">+ Agregar fijo</button>
@@ -2602,7 +2633,7 @@ class Component extends DCLogic {
     this.importAllRef=React.createRef();
     this.importBudgetRef=React.createRef();
     this.importDiarioRef=React.createRef();
-    const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
+    const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={checked:[],date:'',pm:''};});
     this._lsKey='gastos_app_v4';
 
     const budgets={}; [...this.fixed,...this.variable].forEach(c=>{budgets[c.id]=c.budget;});
@@ -2623,7 +2654,7 @@ class Component extends DCLogic {
       fixedTab:'registro', fixedPayments,
       itemMatrix, monthComments, caja, importedTotals:{}, showImportPicker:false, showDeletePanel:false, deleteMonth:0, showMonth:null, importing:false, importMsg:'',
       recurringConfig:{luz:{amount:0,interval:3},rego:{amount:0,interval:6},mecanico:{amount:0,interval:12}},
-      fixedDefs: this.fixed.map(f=>({id:f.id, name:f.name, budget:f.budget})),
+      fixedDefs: this.fixed.map(f=>({id:f.id, name:f.name, budget:f.budget, cuotas:1})),
       recurringDefs: this.recurring.map(r=>({id:r.id, name:r.name, amount:r.amount, interval:r.interval})),
       variableDefs: this.variable.map(v=>({id:v.id, name:v.name, group:v.group, budget:v.budget})),
       variableGroups: ['Comida','Transporte','Personal'],
@@ -2659,6 +2690,7 @@ class Component extends DCLogic {
         if(!s.itemBudgets||typeof s.itemBudgets!=='object') delete s.itemBudgets;
         if(!s.closedMonths||typeof s.closedMonths!=='object') delete s.closedMonths;
         if(!s.draft||typeof s.draft!=='object') delete s.draft;
+        if(s.fixedPayments&&typeof s.fixedPayments==='object'){Object.keys(s.fixedPayments).forEach(k=>{const p=s.fixedPayments[k];if(p&&typeof p.done==='boolean'){s.fixedPayments[k]={checked:[p.done],date:p.date||'',pm:p.pm||''};} else if(p&&!Array.isArray(p.checked)){s.fixedPayments[k]={checked:[],date:p.date||'',pm:p.pm||''};}});}
         this.state={...this.state,...s};
       }
     }catch(e){}
@@ -2713,7 +2745,7 @@ class Component extends DCLogic {
     const variableLogged=exps.filter(e=>!e.rec&&!isItem(e)).reduce((s,e)=>s+e.amount,0);
     const recurringActual=exps.filter(e=>e.rec&&!isItem(e)).reduce((s,e)=>s+e.amount,0);
     const recurringContribution=this.state.prorate?this.recurringAmortTotal:recurringActual;
-    const fixedActual=this.fixed.reduce((s,c)=>{const p=this.state.fixedPayments[c.id];return s+(p&&p.done?this.budgetOf(c.id):0);},0);
+    const fixedActual=this.fixed.reduce((s,c)=>{const p=this.state.fixedPayments[c.id];const cuotas=c.cuotas||1;const checkedCount=p&&p.checked?p.checked.filter(Boolean).length:0;return s+(checkedCount/cuotas)*this.budgetOf(c.id);},0);
     const actual=fixedActual+variableLogged+recurringContribution;
     const realActual=fixedActual+variableLogged+recurringActual;
     const budget=this.monthBudget;
@@ -2841,7 +2873,7 @@ class Component extends DCLogic {
     const importedTotals={...this.state.importedTotals}; delete importedTotals[mi];
     const closedMonths={...this.state.closedMonths}; delete closedMonths[mi];
     const fixedPayments={};
-    this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
+    this.fixed.forEach(f=>{fixedPayments[f.id]={checked:[],date:'',pm:''};});
     this.setState({expenses,itemMatrix,caja,monthComments,importedTotals,closedMonths,fixedPayments,showDeletePanel:false});
   }
   resetAll(){
@@ -2849,7 +2881,7 @@ class Component extends DCLogic {
     try{localStorage.removeItem(this._lsKey);}catch(e){}
     const z12=()=>[0,0,0,0,0,0,0,0,0,0,0,0];
     const budgets={}; [...this.fixed,...this.variable].forEach(c=>{budgets[c.id]=c.budget;});
-    const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
+    const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={checked:[],date:'',pm:''};});
     const methods=this.pm.map(m=>({...m,inicial:0,saldoReal:0}));
     const recurringConfig={luz:{amount:0,interval:3},rego:{amount:0,interval:6},mecanico:{amount:0,interval:12}};
     const fixedDefs=[{id:'renta',name:'Renta',budget:0},{id:'internet',name:'Internet',budget:0},{id:'salud',name:'Seguro Médico',budget:0},{id:'celular',name:'Celular · Telstra',budget:0},{id:'seguroauto',name:'Seguro Auto',budget:0},{id:'corte',name:'Corte de Pelo',budget:0}];
@@ -2872,8 +2904,9 @@ class Component extends DCLogic {
     const itemBudgets={}; this.items.forEach(it=>{itemBudgets[it.id]=0;});
     this.setState({budgets,recurringDefs,recurringConfig,itemBudgets});
   }
-  addFixed(){ const id='f'+Date.now(); this.setState(s=>({fixedDefs:[...(s.fixedDefs||[]),{id,name:'Nueva categoría',budget:0}]})); }
+  addFixed(){ const id='f'+Date.now(); this.setState(s=>({fixedDefs:[...(s.fixedDefs||[]),{id,name:'Nueva categoría',budget:0,cuotas:1}]})); }
   setFixedName(id,val){ this.setState(s=>({fixedDefs:(s.fixedDefs||[]).map(f=>f.id===id?{...f,name:val}:f)})); }
+  setFixedCuotas(id,val){ const v=Math.min(6,Math.max(1,parseInt(val)||1)); this.setState(s=>({fixedDefs:(s.fixedDefs||[]).map(f=>f.id===id?{...f,cuotas:v}:f)})); }
   delFixed(id){ this.setState(s=>({fixedDefs:(s.fixedDefs||[]).filter(f=>f.id!==id)})); }
   addRecurringCat(){ const id='r'+Date.now(); this.setState(s=>({recurringDefs:[...(s.recurringDefs||[]),{id,name:'Nuevo recurrente',amount:0,interval:3}]})); }
   setRecurringName(id,val){ this.setState(s=>({recurringDefs:(s.recurringDefs||[]).map(r=>r.id===id?{...r,name:val}:r)})); }
@@ -2884,7 +2917,7 @@ class Component extends DCLogic {
   addGroup(){ const name='Grupo '+(Date.now()%10000); this.setState(s=>({variableGroups:[...(s.variableGroups||[]),name]})); }
   renameGroup(old,val){ if(!val.trim()) return; this.setState(s=>({variableGroups:(s.variableGroups||[]).map(g=>g===old?val:g),variableDefs:(s.variableDefs||[]).map(v=>v.group===old?{...v,group:val}:v)})); }
   delGroup(name){ if(!window.confirm('¿Eliminar grupo "'+name+'" y todas sus categorías?')) return; this.setState(s=>({variableGroups:(s.variableGroups||[]).filter(g=>g!==name),variableDefs:(s.variableDefs||[]).filter(v=>v.group!==name)})); }
-  toggleFixedDone(id){ this.setState(s=>{const fp={...s.fixedPayments,[id]:{...s.fixedPayments[id],done:!s.fixedPayments[id].done}};return {fixedPayments:fp};}); }
+  toggleFixedCuota(id,idx){ this.setState(s=>{const p=s.fixedPayments[id]||{checked:[],date:'',pm:''};const checked=[...((p.checked)||[])];checked[idx]=!checked[idx];return {fixedPayments:{...s.fixedPayments,[id]:{...p,checked}}};}); }
   setFixedPayment(id,field,val){ this.setState(s=>{const fp={...s.fixedPayments,[id]:{...s.fixedPayments[id],[field]:val}};return {fixedPayments:fp};}); }
   toggleDark(){ this.setState(s=>({darkMode:!s.darkMode})); }
   exportData(){
@@ -3097,7 +3130,7 @@ class Component extends DCLogic {
       const list=(g==='Recurrentes'?this.recurring:this.variable.filter(c=>c.group===g));
       return {group:g,color:this.gc[g]||'#9ca3af',cats:list.map(c=>{const on=S.draft.cat===c.id;return{name:c.name,pick:()=>this.setDraft('cat',c.id),border:on?c.color:'var(--cb)',bg:on?c.color:'var(--card)',fg:on?'#fff':'var(--ink)'};})};
     });
-    const catEdFixes=(S.fixedDefs||[]).map(f=>({name:f.name,onName:e=>this.setFixedName(f.id,e.target.value),onDel:()=>this.delFixed(f.id)}));
+    const catEdFixes=(S.fixedDefs||[]).map(f=>({name:f.name,onName:e=>this.setFixedName(f.id,e.target.value),onDel:()=>this.delFixed(f.id),cuotas:f.cuotas||1,onCuotas:e=>this.setFixedCuotas(f.id,e.target.value)}));
     const catEdRecurr=(S.recurringDefs||[]).map(r=>({name:r.name,onName:e=>this.setRecurringName(r.id,e.target.value),onDel:()=>this.delRecurring(r.id)}));
     const catEdGroups=(S.variableGroups||[]).map(g=>({group:g,color:this.gc[g]||'#9ca3af',onRename:e=>this.renameGroup(g,e.target.value),onDelGroup:()=>this.delGroup(g),onAddItem:()=>this.addVariable(g),items:this.variable.filter(v=>v.group===g).map(v=>({name:v.name,onName:e=>this.setVariableName(v.id,e.target.value),onDel:()=>this.delVariable(v.id)}))}));
     const draftRecurring=!!this.recurring.find(r=>r.id===S.draft.cat);
@@ -3141,7 +3174,7 @@ class Component extends DCLogic {
     const methods=Array.isArray(S.methods)?S.methods:[];
     const methodRows=methods.map(m=>{
       const expGasto=this.monthExpenses(this.curMonth).filter(e=>e.pm===m.id).reduce((s,e)=>s+e.amount,0);
-      const fixGasto=this.fixed.reduce((s,f)=>{const p=S.fixedPayments[f.id];return s+(p&&p.done&&p.pm===m.id?this.budgetOf(f.id):0);},0);
+      const fixGasto=this.fixed.reduce((s,f)=>{const p=S.fixedPayments[f.id];const cuotas=f.cuotas||1;const checkedCount=p&&p.checked?p.checked.filter(Boolean).length:0;return s+(checkedCount>0&&p&&p.pm===m.id?this.budgetOf(f.id)*checkedCount/cuotas:0);},0);
       const gasto=expGasto+fixGasto;
       const deberia=m.inicial-gasto; const diff=m.saldoReal-deberia;
       totDeb+=deberia; totReal+=m.saldoReal;
@@ -3251,16 +3284,27 @@ class Component extends DCLogic {
         onInput:(e)=>{const t=e.target.value;this.setState({editing:{id:uid,text:t}});const v=parseFloat(t.replace(/[^0-9.]/g,''));if(!isNaN(v))this.setState(s=>({budgets:{...s.budgets,[id]:v/(s.currency==='AUD'?1:this.rate)}}));},
         onBlur:()=>this.setState({editing:{id:null,text:''}})};};
     const fixedPayList=this.fixed.map(f=>{
-      const p=fp[f.id]||{done:false,date:'',pm:''};
+      const p=fp[f.id]||{checked:[],date:'',pm:''};
+      const cuotas=f.cuotas||1;
       const ae=lineHM(f.id);
-      return {id:f.id,name:f.name,amtVal:ae.value,amtFocus:ae.onFocus,amtInput:ae.onInput,amtBlur:ae.onBlur,done:p.done,
-        checkBg:p.done?'var(--accent)':'transparent',checkBd:p.done?'var(--accent)':'var(--cb)',
-        date:p.date,onDate:(e)=>this.setFixedPayment(f.id,'date',e.target.value),
-        toggle:()=>this.toggleFixedDone(f.id),
+      const checkedArr=p.checked||[];
+      const checkedCount=checkedArr.filter(Boolean).length;
+      const allDone=checkedCount===cuotas;
+      const cuotaBoxes=Array.from({length:cuotas},(_,i)=>{
+        const on=!!checkedArr[i];
+        return {on,toggle:()=>this.toggleFixedCuota(f.id,i),label:'C'+(i+1),
+          checkBg:on?'var(--accent)':'transparent',checkBd:on?'var(--accent)':'var(--cb)'};
+      });
+      return {id:f.id,name:f.name,amtVal:ae.value,amtFocus:ae.onFocus,amtInput:ae.onInput,amtBlur:ae.onBlur,
+        done:allDone,anyDone:checkedCount>0,checkedCount,cuotas,
+        perCuotaFmt:this.fmt0(this.budgetOf(f.id)/cuotas),
+        checkBg:allDone?'var(--accent)':'transparent',checkBd:allDone?'var(--accent)':'var(--cb)',
+        date:p.date||'',onDate:(e)=>this.setFixedPayment(f.id,'date',e.target.value),
+        cuotaBoxes,
         pmChips:methods.map(m=>({name:m.name.slice(0,9),bd:p.pm===m.id?m.color:'var(--cb)',bg:p.pm===m.id?m.color:'var(--card)',fg:p.pm===m.id?'#fff':'var(--ink)',pick:()=>this.setFixedPayment(f.id,'pm',m.id)}))};
     });
-    const fixedPaidCount=this.fixed.filter(f=>fp[f.id]&&fp[f.id].done).length;
-    const fixedPaidTotal=this.fmt0(this.fixed.reduce((s,f)=>{const p=fp[f.id];return s+(p&&p.done?this.budgetOf(f.id):0);},0));
+    const fixedPaidCount=fixedPayList.filter(f=>f.anyDone).length;
+    const fixedPaidTotal=this.fmt0(this.fixed.reduce((s,f)=>{const p=fp[f.id];const cuotas=f.cuotas||1;const cnt=p&&p.checked?p.checked.filter(Boolean).length:0;return s+cnt/cuotas*this.budgetOf(f.id);},0));
     const dIsReg=S.fixedTab==='registro', dIsFijos=S.fixedTab==='fijos';
     const dActBg='var(--card)',dActFg='var(--ink)',dIdleBg='transparent',dIdleFg='var(--muted)';
 
@@ -3313,6 +3357,8 @@ class Component extends DCLogic {
       remainingFmt:this.fmt0(Math.abs(remaining)), remainColor:remaining>=0?'#3f8f63':'#b8472e',
       fixAvailFmt:this.fmt0(Math.abs(this.fixedTotal-md.fixedActual)), fixAvailColor:(this.fixedTotal-md.fixedActual)>=0?'#3f8f63':'#b8472e', fixBudgetFmt:this.fmt0(this.fixedTotal),
       varAvailFmt:this.fmt0(Math.abs(this.variableBudgetTotal-md.variableLogged)), varAvailColor:(this.variableBudgetTotal-md.variableLogged)>=0?'#3f8f63':'#b8472e', varBudgetFmt:this.fmt0(this.variableBudgetTotal),
+      fixPieDash:(()=>{const pct=this.fixedTotal>0?Math.max(0,Math.min(100,(this.fixedTotal-md.fixedActual)/this.fixedTotal*100)):100;return (pct/100*87.96).toFixed(2)+' 87.96';})(),
+      varPieDash:(()=>{const pct=this.variableBudgetTotal>0?Math.max(0,Math.min(100,(this.variableBudgetTotal-md.variableLogged)/this.variableBudgetTotal*100)):100;return (pct/100*87.96).toFixed(2)+' 87.96';})(),
       dailyLeftFmt:this.fmt0(Math.max(0,dailyLeft)), daysLeftLabel:daysLeft+' días · por día',
       todayFmt:this.fmt0(todaySpent), avgFmt:this.fmt0(variableBurn), projFmt:this.fmt0(projection), projColor:projection>md.budget?'#b8472e':'#3f8f63',
       topCats, recent,
@@ -3345,7 +3391,7 @@ class Component extends DCLogic {
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
       cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaGastoTotFmt:this.fmt0(cajaGastoTot), cajaFinalAnualFmt:this.fmt0(cajaFinalAnualTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual, pctCajaProyectado,
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v1.8',
+      appVersion:'v1.9',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
