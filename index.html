@@ -1830,6 +1830,11 @@
         <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Meta variable + recurrente {{ loggedBudgetFmt }}</div>
       </div>
 
+      <div style="display:flex;gap:8px;margin-top:12px;margin-bottom:2px">
+        <button onClick="{{ exportDiario }}" style="flex:1;padding:10px 0;border-radius:12px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">↑ Exportar mes</button>
+        <button onClick="{{ triggerImportDiario }}" style="flex:1;padding:10px 0;border-radius:12px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">↓ Importar mes</button>
+      </div>
+
       <sc-for list="{{ groups }}" as="g" hint-placeholder-count="5">
         <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 4px 6px">
           <div style="font-size:13px;font-weight:600">{{ g.head }} <span style="color:var(--muted);font-weight:500">· {{ g.sub }}</span></div>
@@ -2518,6 +2523,7 @@
 
   <input type="file" accept=".xlsx,.csv,.json" ref="{{ fileRef }}" onChange="{{ onImportFile }}" style="display:none"/>
   <input type="file" accept=".json" ref="{{ importAllRef }}" onChange="{{ onImportAll }}" style="display:none"/>
+  <input type="file" accept=".json" ref="{{ importDiarioRef }}" onChange="{{ onImportDiario }}" style="display:none"/>
 
 </div>
 </x-dc>
@@ -2590,6 +2596,7 @@ class Component extends DCLogic {
     this.fileRef=React.createRef();
     this.importAllRef=React.createRef();
     this.importBudgetRef=React.createRef();
+    this.importDiarioRef=React.createRef();
     const fixedPayments={}; this.fixed.forEach(f=>{fixedPayments[f.id]={done:false,date:'',pm:''};});
     this._lsKey='gastos_app_v4';
 
@@ -2738,6 +2745,27 @@ class Component extends DCLogic {
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='presupuesto-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
   }
   triggerImportBudget(){ if(this.importBudgetRef.current) this.importBudgetRef.current.click(); }
+  exportDiario(){
+    const S=this.state; const mi=S.curMonth; const yr=this.year;
+    const prefix=yr+'-'+(String(mi+1).padStart(2,'0'));
+    const exps=S.expenses.filter(e=>e.date&&e.date.startsWith(prefix));
+    const blob=new Blob([JSON.stringify({month:prefix,expenses:exps},null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='gastos-'+prefix+'.json'; a.click();
+  }
+  triggerImportDiario(){ if(this.importDiarioRef.current) this.importDiarioRef.current.click(); }
+  async onImportDiario(e){
+    const file=e.target.files&&e.target.files[0]; e.target.value=''; if(!file) return;
+    try{
+      const data=JSON.parse(await file.text());
+      const exps=Array.isArray(data.expenses)?data.expenses:Array.isArray(data)?data:null;
+      if(!exps) throw new Error();
+      const prefix=data.month||(exps[0]&&exps[0].date&&exps[0].date.slice(0,7));
+      this.setState(s=>{
+        const kept=prefix?s.expenses.filter(e=>!(e.date&&e.date.startsWith(prefix))):s.expenses;
+        return {expenses:[...kept,...exps]};
+      });
+    }catch(err){ alert('Archivo inválido. Usa un JSON exportado desde Gastos.'); }
+  }
   downloadXlsxTemplate(){
     this._syncCats();
     const cats=[...Object.values(this.cat).map(c=>c.name)];
@@ -3305,6 +3333,7 @@ class Component extends DCLogic {
 
       // budget export/import
       exportBudget:()=>this.exportBudget(), triggerImportBudget:()=>this.triggerImportBudget(), downloadXlsxTemplate:()=>this.downloadXlsxTemplate(),
+      exportDiario:()=>this.exportDiario(), triggerImportDiario:()=>this.triggerImportDiario(), importDiarioRef:this.importDiarioRef, onImportDiario:(e)=>this.onImportDiario(e),
       importBudgetRef:this.importBudgetRef, onImportBudget:(e)=>this.onImportBudget(e),
       budgetMsg:S.budgetMsg,
       resetBudgets:()=>this.resetBudgets(),
