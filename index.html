@@ -2501,7 +2501,10 @@
         <div style="font-size:18px;font-weight:600">Importar Excel</div>
         <button onClick="{{ closeImportPicker }}" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">×</button>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Elige a qué mes cargar los datos. Sube el .xlsx (hoja «Data»: Day · Monto · Detalle · Clasificación).</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Sube el .xlsx con hoja <b style="color:var(--ink)">Data</b>:<br/>Day · Monto · Detalle · Clasificación</div>
+        <button onClick="{{ downloadXlsxTemplate }}" style="flex:none;margin-left:12px;padding:8px 13px;border-radius:10px;border:1.5px solid var(--accent);background:rgba(47,107,216,.06);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">↓ Plantilla</button>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px">
         <sc-for list="{{ importMonths }}" as="im" hint-placeholder-count="12">
           <button onClick="{{ im.pick }}" style="padding:13px 0;border-radius:12px;border:1.5px solid {{ im.bd }};background:var(--card);cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:3px">
@@ -2735,6 +2738,15 @@ class Component extends DCLogic {
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='presupuesto-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
   }
   triggerImportBudget(){ if(this.importBudgetRef.current) this.importBudgetRef.current.click(); }
+  downloadXlsxTemplate(){
+    this._syncCats();
+    const cats=[...Object.values(this.cat).map(c=>c.name)];
+    const eg=cats[0]||'Supermercado';
+    const rows=[['Day','Monto','Detalle','Clasificación'],[1,5000,'Ejemplo compra',eg],[2,12000,'Otro gasto',cats[1]||eg]];
+    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='plantilla-gastos.csv'; a.click();
+  }
   async onImportBudget(e){
     const file=e.target.files&&e.target.files[0]; e.target.value=''; if(!file) return;
     try{
@@ -3204,7 +3216,7 @@ class Component extends DCLogic {
       deleteMonthOpts:(this.monthFull||[]).map((n,i)=>({label:n,sel:S.deleteMonth===i,pick:()=>this.setState({deleteMonth:i}),selBd:S.deleteMonth===i?'var(--accent)':'var(--cb)',selBg:S.deleteMonth===i?'var(--accent)':'var(--card)',selFg:S.deleteMonth===i?'#fff':'var(--ink)'})),
       doDeleteMonth:()=>this.resetMonth(S.deleteMonth),
       doDeleteAll:()=>this.resetAll(),
-      openAdd:()=>this.setState({showAdd:true}), closeAdd:()=>this.setState({showAdd:false,editingExpense:null}),
+      openAdd:()=>this.setState({showAdd:true,draft:{...this.state.draft,amount:'',label:''}}), closeAdd:()=>this.setState({showAdd:false,editingExpense:null}),
       showSettings:S.showSettings, showAdd:S.showAdd,
       showFab:S.tab==='inicio'||S.tab==='diario',
       goInicio:()=>this.setTab('inicio'), goDiario:()=>this.setTab('diario'), goPresup:()=>this.setTab('presupuesto'), goAnual:()=>this.setTab('anual'), goBanco:()=>this.setTab('banco'),
@@ -3292,7 +3304,7 @@ class Component extends DCLogic {
       catEdFixes, catEdRecurr, catEdGroups,
 
       // budget export/import
-      exportBudget:()=>this.exportBudget(), triggerImportBudget:()=>this.triggerImportBudget(),
+      exportBudget:()=>this.exportBudget(), triggerImportBudget:()=>this.triggerImportBudget(), downloadXlsxTemplate:()=>this.downloadXlsxTemplate(),
       importBudgetRef:this.importBudgetRef, onImportBudget:(e)=>this.onImportBudget(e),
       budgetMsg:S.budgetMsg,
       resetBudgets:()=>this.resetBudgets(),
