@@ -2242,7 +2242,10 @@
               <div style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);background:{{ m.rowBg }}">
                 <div onClick="{{ m.open }}" style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if><sc-if value="{{ m.isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;flex:none">🔒</span></sc-if></div>
                 <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
-                  <div style="flex:1;padding:4px 3px"><input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:{{ c.color }}"/></div>
+                  <div style="flex:1;padding:4px 3px">
+                    <sc-if value="{{ c.isAuto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;padding:6px 3px;color:var(--accent)">{{ c.autoFmt }}</div></sc-if>
+                    <sc-if value="{{ !c.isAuto }}" hint-placeholder-val="{{ true }}"><input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:{{ c.color }}"/></sc-if>
+                  </div>
                 </sc-for>
                 <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:600">{{ m.totFmt }}</div>
               </div>
@@ -2705,8 +2708,10 @@ class Component extends DCLogic {
 
   monthData(mi){
     const exps=this.monthExpenses(mi);
-    const variableLogged=exps.filter(e=>!e.rec).reduce((s,e)=>s+e.amount,0);
-    const recurringActual=exps.filter(e=>e.rec).reduce((s,e)=>s+e.amount,0);
+    const itemIds=new Set(this.items.map(it=>it.id));
+    const isItem=e=>itemIds.has(e.cat)||itemIds.has(e.rec);
+    const variableLogged=exps.filter(e=>!e.rec&&!isItem(e)).reduce((s,e)=>s+e.amount,0);
+    const recurringActual=exps.filter(e=>e.rec&&!isItem(e)).reduce((s,e)=>s+e.amount,0);
     const recurringContribution=this.state.prorate?this.recurringAmortTotal:recurringActual;
     const fixedActual=this.fixed.reduce((s,c)=>{const p=this.state.fixedPayments[c.id];return s+(p&&p.done?this.budgetOf(c.id):0);},0);
     const actual=fixedActual+variableLogged+recurringContribution;
@@ -3171,14 +3176,35 @@ class Component extends DCLogic {
 
     // ---- control por ítem (Anual) ----
     const its=this.items, im=S.itemMatrix;
-    const itemGasto={}; its.forEach(it=>{itemGasto[it.id]=im[it.id].reduce((a,b)=>a+b,0);});
+    // compute actuals from diario expenses per item per month
+    const itemActuals={}; its.forEach(it=>{itemActuals[it.id]=new Array(12).fill(0);});
+    S.expenses.forEach(e=>{
+      if(!e.date) return;
+      const d=new Date(e.date); if(d.getFullYear()!==this.year) return;
+      const mi2=d.getMonth();
+      const itemId=its.find(it=>it.id===e.cat||it.id===e.rec)?.id;
+      if(itemId) itemActuals[itemId][mi2]+=e.amount;
+    });
+    const itemGasto={}; its.forEach(it=>{
+      itemGasto[it.id]=new Array(12).fill(0).reduce((_,__,mi2)=>_+Math.round(itemActuals[it.id][mi2])||im[it.id][mi2],0);
+    });
     const gastoAnoTot=its.reduce((a,it)=>a+itemGasto[it.id],0);
     const presupTot=its.reduce((a,it)=>a+(S.itemBudgets?.[it.id]??it.budget),0);
     const difTot=gastoAnoTot>0?presupTot-gastoAnoTot:0, difMes=difTot/12;
     const itemHeader=its.map(it=>({short:it.short,color:it.color}));
     const monthMatrix=[]; for(let mi=0;mi<12;mi++){
-      const cells=its.map(it=>{const v=im[it.id][mi]; const key=it.id+'_'+mi; const isEd=S.imEditing?.key===key; return {txt:v?this.fmt0(v):'·',color:v?'var(--ink)':'#c5cedb',key,val:isEd?S.imEditing.text:(v||''),onFocus:e=>this.setImEdit(key,String(e.target.value)),onInput:e=>{this.setImEdit(key,e.target.value);this.setItemMatrixCell(it.id,mi,e.target.value);},onBlur:()=>this.setState({imEditing:{key:null,text:''}})};});
-      const tot=its.reduce((a,it)=>a+im[it.id][mi],0);
+      const cells=its.map(it=>{
+        const expV=Math.round(itemActuals[it.id][mi]); const manV=im[it.id][mi];
+        const isAuto=expV>0; const displayV=expV||manV;
+        const key=it.id+'_'+mi; const isEd=S.imEditing?.key===key;
+        return {isAuto,autoFmt:expV?this.fmt0(expV):'·',
+          color:displayV?'var(--ink)':'#c5cedb',key,
+          val:isEd?S.imEditing.text:(manV||''),
+          onFocus:e=>this.setImEdit(key,String(e.target.value)),
+          onInput:e=>{this.setImEdit(key,e.target.value);this.setItemMatrixCell(it.id,mi,e.target.value);},
+          onBlur:()=>this.setState({imEditing:{key:null,text:''}})};
+      });
+      const tot=its.reduce((a,it)=>a+(Math.round(itemActuals[it.id][mi])||im[it.id][mi]),0);
       monthMatrix.push({abbr:this.monthAbbr[mi],cells,totFmt:tot?this.fmt0(tot):'·',hasComment:!!S.monthComments[mi],isClosed:!!S.closedMonths[mi],rowBg:mi===this.curMonth?'rgba(47,107,216,.06)':'transparent',open:()=>this.setState({showMonth:mi})});
     }
     const itemFooter=its.map(it=>{const ib=S.itemBudgets?.[it.id]??it.budget; const k=it.id+'_ppto'; const isEd=S.ibEditing?.key===k; const dif=ib-itemGasto[it.id]; return{gastoFmt:this.fmt0(itemGasto[it.id]),presupV:isEd?S.ibEditing.text:String(ib),presupFmt:this.fmt0(ib),presupFocus:e=>this.setIbEdit(k,e.target.value),presupInput:e=>{this.setIbEdit(k,e.target.value);this.setItemBudget(it.id,e.target.value);},presupBlur:()=>this.setState({ibEditing:{key:null,text:''}}),difFmt:(dif<0?'−':'+')+this.fmt0(Math.abs(dif)),difColor:dif<0?'#b8472e':'#3f8f63'};});
