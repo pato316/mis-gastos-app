@@ -2486,9 +2486,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
           Importar mes
         </button>
-        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--ink)' }};font-size:13px;font-weight:600;cursor:pointer">
-          {{ monthIsClosed ? '🔒 Cerrado' : '📌 Cerrar mes' }}
-        </button>
+        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--ink)' }};font-size:13px;font-weight:600;cursor:pointer">{{ monthIsClosed ? '🔒 Cerrado' : '📌 Cerrar mes' }}</button>
       </div>
       <sc-if value="{{ importMsg }}" hint-placeholder-val="{{ false }}">
         <div style="font-size:12px;color:var(--accent);font-weight:500;margin-top:10px;flex:none;text-align:center">{{ importMsg }}</div>
