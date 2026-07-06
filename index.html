@@ -2275,24 +2275,24 @@
             <div style="display:flex;background:var(--subtle);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;color:var(--muted)">
               <div style="width:44px;flex:none;padding:8px 6px">Mes</div>
               <div style="flex:1;padding:8px 4px;text-align:right">Caja ppto</div>
-              <div style="flex:1;padding:8px 4px;text-align:right">Caja final</div>
               <div style="width:46px;flex:none;padding:8px 4px;text-align:right">%</div>
+              <div style="flex:1;padding:8px 4px;text-align:right">Caja final</div>
               <div style="flex:1;padding:8px 4px;text-align:right">Ing. extra</div>
             </div>
             <sc-for list="{{ cajaRows }}" as="r" hint-placeholder-count="12">
               <div style="display:flex;align-items:center;border-top:1px solid var(--cb)">
                 <div style="width:44px;flex:none;padding:7px 6px;font-size:11px;font-weight:600">{{ r.abbr }}</div>
                 <div style="flex:1;padding:4px 4px"><input value="{{ r.pptoV }}" onInput="{{ r.pptoI }}" onFocus="{{ r.pptoF }}" onBlur="{{ r.pptoB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 5px"/></div>
-                <div style="flex:1;padding:4px 4px"><input value="{{ r.finalV }}" onInput="{{ r.finalI }}" onFocus="{{ r.finalF }}" onBlur="{{ r.finalB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 5px"/></div>
                 <div style="width:46px;flex:none;padding:4px 3px"><input value="{{ r.pctV }}" onInput="{{ r.pctI }}" onFocus="{{ r.pctF }}" onBlur="{{ r.pctB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 3px"/></div>
+                <div style="flex:1;padding:9px 4px;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;color:var(--accent)">{{ r.finalFmt }}</div>
                 <div style="flex:1;padding:4px 4px"><input value="{{ r.ingV }}" onInput="{{ r.ingI }}" onFocus="{{ r.ingF }}" onBlur="{{ r.ingB }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border-radius:6px;padding:6px 5px"/></div>
               </div>
             </sc-for>
             <div style="display:flex;align-items:center;border-top:2px solid var(--cb);background:var(--subtle);font-family:var(--fnum);font-size:10px;font-weight:700">
               <div style="width:44px;flex:none;padding:9px 6px;font-family:var(--fui)">Año</div>
               <div style="flex:1;padding:9px 4px;text-align:right">{{ cajaPptoTotFmt }}</div>
-              <div style="flex:1;padding:9px 4px;text-align:right">{{ cajaFinalTotFmt }}</div>
               <div style="width:46px;flex:none;padding:9px 3px;text-align:right">{{ pctAnual }}%</div>
+              <div style="flex:1;padding:9px 4px;text-align:right;color:var(--accent)">{{ cajaFinalTotFmt }}</div>
               <div style="flex:1;padding:9px 4px;text-align:right">{{ ingresoTotFmt }}</div>
             </div>
           </div>
@@ -2486,7 +2486,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>
           Importar mes
         </button>
-        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--muted)' }};font-size:13px;font-weight:600;cursor:pointer">
+        <button onClick="{{ stampMonth }}" style="flex:1;padding:13px 0;border-radius:13px;border:1.5px solid {{ monthIsClosed ? '#3f8f63' : 'var(--cb)' }};background:{{ monthIsClosed ? 'rgba(63,143,99,.08)' : 'var(--card)' }};color:{{ monthIsClosed ? '#3f8f63' : 'var(--ink)' }};font-size:13px;font-weight:600;cursor:pointer">
           {{ monthIsClosed ? '🔒 Cerrado' : '📌 Cerrar mes' }}
         </button>
       </div>
@@ -3182,20 +3182,21 @@ class Component extends DCLogic {
     const itemFooter=its.map(it=>{const ib=S.itemBudgets?.[it.id]??it.budget; const k=it.id+'_ppto'; const isEd=S.ibEditing?.key===k; const dif=ib-itemGasto[it.id]; return{gastoFmt:this.fmt0(itemGasto[it.id]),presupV:isEd?S.ibEditing.text:String(ib),presupFmt:this.fmt0(ib),presupFocus:e=>this.setIbEdit(k,e.target.value),presupInput:e=>{this.setIbEdit(k,e.target.value);this.setItemBudget(it.id,e.target.value);},presupBlur:()=>this.setState({ibEditing:{key:null,text:''}}),difFmt:(dif<0?'−':'+')+this.fmt0(Math.abs(dif)),difColor:dif<0?'#b8472e':'#3f8f63'};});
     // ---- balance de caja mensual ----
     const cj=S.caja;
-    const cajaRows=[]; for(let mi=0;mi<12;mi++){
+    const cajaRows=[]; let cajaFinalTot=0; for(let mi=0;mi<12;mi++){
       const ep=mkEdit('cj_p_'+mi,String(cj.ppto[mi]||0),(t)=>this.setCaja('ppto',mi,t));
-      const ef=mkEdit('cj_f_'+mi,String(cj.final[mi]||0),(t)=>this.setCaja('final',mi,t));
       const ec=mkEdit('cj_pc_'+mi,String(cj.pct[mi]||0),(t)=>this.setCaja('pct',mi,t));
       const ei=mkEdit('cj_i_'+mi,String(cj.ingreso[mi]||0),(t)=>this.setCaja('ingreso',mi,t));
+      const mTot=its.reduce((a,it)=>a+(im[it.id][mi]||0),0);
+      const finalVal=(cj.ppto[mi]||0)+mTot; cajaFinalTot+=finalVal;
       cajaRows.push({abbr:this.monthAbbr[mi],
         pptoV:ep.value,pptoF:ep.onFocus,pptoI:ep.onInput,pptoB:ep.onBlur,
-        finalV:ef.value,finalF:ef.onFocus,finalI:ef.onInput,finalB:ef.onBlur,
+        finalFmt:this.fmt0(finalVal),
         pctV:ec.value,pctF:ec.onFocus,pctI:ec.onInput,pctB:ec.onBlur,
         ingV:ei.value,ingF:ei.onFocus,ingI:ei.onInput,ingB:ei.onBlur,
       });
     }
     const sumA=(a)=>a.reduce((x,y)=>x+(y||0),0);
-    const cajaPptoTot=sumA(cj.ppto), cajaFinalTot=sumA(cj.final), ingresoTot=sumA(cj.ingreso);
+    const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
     const balanceCajaAnual=cajaFinalTot+ingresoTot-gastoAnoTot;
 
