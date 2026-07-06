@@ -1754,8 +1754,11 @@
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:16px 16px 12px;margin-top:12px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
           <div>
-            <div style="font-size:14px;font-weight:600">Proyección del mes</div>
-            <div style="font-size:11px;color:var(--muted)">Variable + Luz · {{ chartDayLabel }}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="font-size:14px;font-weight:600">Proyección del mes</div>
+              <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:99px;border:1.5px solid {{ showFixed ? 'var(--accent)' : 'var(--cb)' }};background:{{ showFixed ? 'var(--accent)' : 'transparent' }};color:{{ showFixed ? '#fff' : 'var(--muted)' }};cursor:pointer">+ Fijo</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted)">{{ chartSubtitle }} · {{ chartDayLabel }}</div>
           </div>
           <div style="text-align:right;display:flex;align-items:baseline;gap:5px">
             <div style="font-family:var(--fnum);font-size:24px;font-weight:700;color:{{ cumplHex }};line-height:1">{{ cumpl }}%</div>
@@ -2668,6 +2671,7 @@ class Component extends DCLogic {
       darkMode: false,
       closedMonths: {},
       settingsMsg: '',
+      chartShowFixed: false,
       expenses: ex,
     };
     // load persisted state — sanitise to prevent null arrays crashing renderVals
@@ -3139,10 +3143,29 @@ class Component extends DCLogic {
     const accSel=this.props.accentColor||'var(--accent)';
 
     // ---- projection chart (Inicio) ----
+    const showFixed=S.chartShowFixed||false;
     const dim=this.daysInMonth, tday=this.dayNum;
-    const tracked=this.variableBudgetTotal+this.recurringAmortTotal;
+    const itemIds2=new Set(this.items.map(it=>it.id));
+    const isItemExp=e=>itemIds2.has(e.cat)||itemIds2.has(e.rec);
+    // variable-only expenses (no recurring, no items)
+    const varExps=md.exps.filter(e=>!e.rec&&!isItemExp(e));
+    // fixed amounts by day (when toggle is on)
+    const fixedByDay={};
+    if(showFixed){
+      this.fixed.forEach(f=>{
+        const p=S.fixedPayments[f.id]; if(!p) return;
+        const cuotas=f.cuotas||1; const perCuota=this.budgetOf(f.id)/cuotas;
+        (p.checked||[]).forEach(on=>{
+          if(!on) return;
+          const day=p.date?parseInt(p.date.slice(8),10):1;
+          if(day>=1&&day<=dim) fixedByDay[day]=(fixedByDay[day]||0)+perCuota;
+        });
+      });
+    }
+    const tracked=showFixed?this.variableBudgetTotal+this.fixedTotal:this.variableBudgetTotal;
     const dayTotals=Array(dim+2).fill(0);
-    md.exps.forEach(e=>{const d=parseInt(e.date.slice(8),10); if(d>=1&&d<=dim) dayTotals[d]+=e.amount;});
+    varExps.forEach(e=>{const d=parseInt(e.date.slice(8),10); if(d>=1&&d<=dim) dayTotals[d]+=e.amount;});
+    if(showFixed) Object.keys(fixedByDay).forEach(d=>{dayTotals[parseInt(d)]+=fixedByDay[d];});
     let cum=0; const realCum=[]; for(let d=1;d<=tday;d++){cum+=dayTotals[d]; realCum.push({d,v:cum});}
     const realToday=cum; const burn=tday?realToday/tday:0;
     const projEnd=realToday+burn*(dim-tday); const planEnd=tracked;
@@ -3162,6 +3185,8 @@ class Component extends DCLogic {
     const cumpl=planToday>0?Math.round(realToday/planToday*100):0;
     const cumplHex=cumpl<=100?'#3f8f63':cumpl<=110?'#c08a2e':'#b8472e';
     const cumplMsg=cumpl<=100?'vas bajo el plan':cumpl<=110?'ligeramente sobre el plan':'sobre el plan';
+    const chartSubtitle=showFixed?'Variable + Fijo':'Solo variable';
+    const toggleChartFixed=()=>this.setState(s=>({chartShowFixed:!s.chartShowFixed}));
 
     // ---- banco / conciliación ----
     const mkEdit=(uid,current,commit)=>{const isEd=S.editing.id===uid;return{
@@ -3342,7 +3367,7 @@ class Component extends DCLogic {
       chartProjColor:projOver?'#b8472e':'#3f8f63', projEndChartFmt:this.fmt0(projEnd), planEndFmt:this.fmt0(planEnd), chartMetaFmt:this.fmt0(tracked),
       cumpl, cumplHex, cumplMsg,
       chartRealDotX:xF(tday).toFixed(1), chartRealDotY:yF(realToday).toFixed(1), chartProjDotX:xF(dim).toFixed(1), chartProjDotY:yF(projEnd).toFixed(1),
-      chartDayLabel:'Día '+tday+' de '+dim,
+      chartDayLabel:'Día '+tday+' de '+dim, chartSubtitle, toggleChartFixed, showFixed,
       chartVerdict: projOver?('Vas a exceder el plan por '+this.fmt0(projEnd-planEnd)):('Cierras bajo plan por '+this.fmt0(planEnd-projEnd)),
       methodRows, totDeberiaFmt:this.fmt0(totDeb), totRealFmt:this.fmt0(totReal),
       totDiffFmt:(totDiff>=0?'+':'−')+this.fmt0(Math.abs(totDiff)), totDiffColor:Math.abs(totDiff)<1?'#3f8f63':(totDiff<0?'#b8472e':'#c08a2e'),
@@ -3391,7 +3416,7 @@ class Component extends DCLogic {
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
       cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaGastoTotFmt:this.fmt0(cajaGastoTot), cajaFinalAnualFmt:this.fmt0(cajaFinalAnualTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual, pctCajaProyectado,
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v1.9',
+      appVersion:'v2.0',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
