@@ -1772,7 +1772,13 @@
           </div>
         </div>
         <svg viewBox="0 0 320 162" style="width:100%;height:auto;display:block;overflow:visible">
-          <line x1="10" y1="{{ chartMetaY }}" x2="312" y2="{{ chartMetaY }}" stroke="#b8b2a6" stroke-width="1" stroke-dasharray="3 3"/>
+          <sc-for list="{{ chartYTicks }}" as="yt" hint-placeholder-count="4">
+            <line x1="{{ chartPadL }}" y1="{{ yt.y }}" x2="312" y2="{{ yt.y }}" stroke="#e8e3db" stroke-width="0.6"/>
+            <text x="43" y="{{ yt.y }}" fill="#a09890" font-size="8" text-anchor="end" dominant-baseline="middle">{{ yt.label }}</text>
+          </sc-for>
+          <line x1="{{ chartCajaPptoX }}" y1="{{ chartCajaPptoY }}" x2="312" y2="{{ chartCajaPptoY }}" stroke="#c08a2e" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="314" y="{{ chartCajaPptoY }}" fill="#c08a2e" font-size="7.5" dominant-baseline="middle">Caja</text>
+          <line x1="{{ chartPadL }}" y1="{{ chartMetaY }}" x2="312" y2="{{ chartMetaY }}" stroke="#b8b2a6" stroke-width="1" stroke-dasharray="3 3"/>
           <path d="{{ chartRealArea }}" fill="rgba(122,160,232,.20)"/>
           <polyline points="{{ chartPlanPts }}" fill="none" stroke="#3a5fcd" stroke-width="2" stroke-linecap="round"/>
           <polyline points="{{ chartRealPts }}" fill="none" stroke="#5b82da" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1784,10 +1790,11 @@
             <text x="{{ tk.x }}" y="155" fill="#8c877c" font-size="9" text-anchor="middle">{{ tk.label }}</text>
           </sc-for>
         </svg>
-        <div style="display:flex;align-items:center;gap:14px;margin-top:4px;font-size:10.5px;color:var(--muted)">
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:10.5px;color:var(--muted);flex-wrap:wrap">
           <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:#3a5fcd;display:inline-block"></span>Plan</span>
           <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:8px;background:rgba(122,160,232,.35);display:inline-block;border-radius:2px"></span>Real</span>
           <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:{{ chartProjColor }};display:inline-block"></span>Proyección</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:#c08a2e;display:inline-block;border-style:dashed;border-width:1px 0 0 0;border-color:#c08a2e"></span>Caja <b style="font-family:var(--fnum);color:var(--ink)">{{ chartCajaPptoFmt }}</b></span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11.5px">
           <span style="color:{{ chartProjColor }};font-weight:600">{{ chartVerdict }}</span>
@@ -2239,9 +2246,11 @@
       <!-- mes a mes -->
       <div style="font-size:15px;font-weight:600;margin:22px 4px 12px">Mes a mes</div>
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:18px 12px 12px">
-        <div style="display:flex;align-items:flex-end;justify-content:space-between;height:96px;gap:3px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;height:108px;gap:3px">
           <sc-for list="{{ months }}" as="m" hint-placeholder-count="12">
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+            <div onClick="{{ m.pick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer">
+              <div style="font-size:7px;font-weight:700;color:{{ m.selColor }};text-align:center;line-height:1.2;margin-bottom:1px">{{ m.selPct }}</div>
+              <div style="font-size:6px;color:{{ m.selColor }};text-align:center;line-height:1;margin-bottom:2px;white-space:nowrap">{{ m.selLabel }}</div>
               <div style="width:100%;max-width:16px;border-radius:4px 4px 2px 2px;height:{{ m.barH }}px;background:{{ m.color }};opacity:{{ m.opacity }}"></div>
             </div>
           </sc-for>
@@ -2644,6 +2653,7 @@ class Component extends DCLogic {
       closedMonths: {},
       settingsMsg: '',
       chartShowFixed: false,
+      selectedMonthBar: null,
       expenses: ex,
     };
     // load persisted state — sanitise to prevent null arrays crashing renderVals
@@ -3108,8 +3118,18 @@ class Component extends DCLogic {
       gapVals.push({gapV:monthBudgetPlan-(cjPpto[mi]||0),mi,future});
     }
     const maxGap=Math.max(1,...gapVals.map(g=>Math.abs(g.gapV)));
+    const selMi=S.selectedMonthBar;
     gapVals.forEach(g=>{
-      months.push({abbr:this.monthAbbr[g.mi],barH:Math.max(2,Math.round(Math.abs(g.gapV)/maxGap*88)),color:g.gapV>0?'#b8472e':'#3f8f63',opacity:g.future?0.5:1,labelColor:g.mi===this.curMonth?'var(--ink)':'var(--muted)'});
+      const gapV=(cjPpto[g.mi]||0)-monthBudgetPlan; // positive=surplus=green, negative=deficit=red
+      const barH=Math.max(2,Math.round(Math.abs(gapV)/maxGap*88));
+      const color=gapV>=0?'#3f8f63':'#b8472e';
+      const pct=monthBudgetPlan>0?Math.round(Math.abs(gapV)/monthBudgetPlan*100):0;
+      const isSel=selMi===g.mi;
+      months.push({abbr:this.monthAbbr[g.mi],barH,color,opacity:g.future?0.5:1,
+        labelColor:g.mi===this.curMonth?'var(--ink)':'var(--muted)',
+        pick:()=>this.setState({selectedMonthBar:selMi===g.mi?null:g.mi}),
+        selLabel:isSel?(gapV>=0?'+':'-')+this.fmt0(Math.abs(gapV)):'',
+        selPct:isSel?pct+'%':'',selColor:isSel?color:'transparent'});
     });
     const ytdBudget=this.monthBudget*(this.curMonth+1);
     const ytdPct=Math.round(ytdA/ytdBudget*100);
@@ -3152,15 +3172,20 @@ class Component extends DCLogic {
       });
     }
     const tracked=showFixed?this.variableBudgetTotal+this.fixedTotal:this.variableBudgetTotal;
+    const trackedFull=this.variableBudgetTotal+this.fixedTotal;
     const dayTotals=Array(dim+2).fill(0);
     varExps.forEach(e=>{const d=parseInt(e.date.slice(8),10); if(d>=1&&d<=dim) dayTotals[d]+=e.amount;});
     if(showFixed) Object.keys(fixedByDay).forEach(d=>{dayTotals[parseInt(d)]+=fixedByDay[d];});
     let cum=0; const realCum=[]; for(let d=1;d<=tday;d++){cum+=dayTotals[d]; realCum.push({d,v:cum});}
     const realToday=cum; const burn=tday?realToday/tday:0;
     const projEnd=realToday+burn*(dim-tday); const planEnd=tracked;
-    const yMax=(Math.max(planEnd,projEnd,realToday)*1.1)||1;
-    const padL=10, padR=8, plotTop=12, plotBot=140, SVGW=320;
+    const cajaPptoM=S.caja?.ppto?.[this.curMonth]||0;
+    const yMax=(Math.max(trackedFull,projEnd,realToday,cajaPptoM)*1.1)||1;
+    const padL=46, padR=8, plotTop=12, plotBot=140, SVGW=320;
     const plotW=SVGW-padL-padR;
+    const fmtK=v=>v>=1000?'$'+Math.round(v/100)/10+'k':'$'+Math.round(v);
+    const chartYTicks=[0,0.33,0.66,1].map(f=>({y:(plotBot-(f*(plotBot-plotTop))).toFixed(1),label:fmtK(yMax*f)}));
+    const chartCajaPptoY=v=>plotBot-(v/yMax)*(plotBot-plotTop);
     const xF=d=>padL+(d-1)/(dim-1)*plotW;
     const yF=v=>plotBot-(v/yMax)*(plotBot-plotTop);
     const planY1=showFixed?this.fixedTotal:tracked/dim;
@@ -3370,6 +3395,8 @@ class Component extends DCLogic {
       colInicio:S.tab==='inicio'?accent:muted, colDiario:S.tab==='diario'?accent:muted, colPresup:S.tab==='presupuesto'?accent:muted, colAnual:S.tab==='anual'?accent:muted, colBanco:S.tab==='banco'?accent:muted,
       chartPlanPts:planPts, chartRealPts:realPts, chartRealArea:realArea, chartProjPts:projPts,
       chartMetaY:yF(tracked).toFixed(1), chartTodayX:xF(tday).toFixed(1), chartPlotBot:plotBot, chartTicks,
+      chartYTicks, chartPadL:String(padL),
+      chartCajaPptoY:chartCajaPptoY(cajaPptoM).toFixed(1), chartCajaPptoFmt:this.fmt0(cajaPptoM), chartCajaPptoX:String(padL),
       chartProjColor:projOver?'#b8472e':'#3f8f63', projEndChartFmt:this.fmt0(projEnd), planEndFmt:this.fmt0(planEnd), chartMetaFmt:this.fmt0(tracked),
       cumpl, cumplHex, cumplMsg,
       chartRealDotX:xF(tday).toFixed(1), chartRealDotY:yF(realToday).toFixed(1), chartProjDotX:xF(dim).toFixed(1), chartProjDotY:yF(projEnd).toFixed(1),
@@ -3432,7 +3459,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.6',
+      appVersion:'v2.7',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
