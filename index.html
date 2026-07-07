@@ -1696,6 +1696,7 @@
             <svg width="48" height="48" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="14" fill="none" stroke="var(--subtle)" stroke-width="5"/>
               <circle cx="18" cy="18" r="14" fill="none" stroke="{{ fixAvailColor }}" stroke-width="5" stroke-dasharray="{{ fixPieDash }}" stroke-dashoffset="-21.99" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+              <text x="18" y="21" text-anchor="middle" font-size="6.5" font-weight="700" fill="{{ fixAvailColor }}">{{ fixUsedPct }}%</text>
             </svg>
             <div>
               <div style="font-family:var(--fnum);font-size:17px;font-weight:600;color:{{ fixAvailColor }}">{{ fixAvailFmt }}</div>
@@ -1709,6 +1710,7 @@
             <svg width="48" height="48" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="14" fill="none" stroke="var(--subtle)" stroke-width="5"/>
               <circle cx="18" cy="18" r="14" fill="none" stroke="{{ varAvailColor }}" stroke-width="5" stroke-dasharray="{{ varPieDash }}" stroke-dashoffset="-21.99" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+              <text x="18" y="21" text-anchor="middle" font-size="6.5" font-weight="700" fill="{{ varAvailColor }}">{{ varUsedPct }}%</text>
             </svg>
             <div>
               <div style="font-family:var(--fnum);font-size:17px;font-weight:600;color:{{ varAvailColor }}">{{ varAvailFmt }}</div>
@@ -1756,7 +1758,7 @@
           <div>
             <div style="display:flex;align-items:center;gap:8px">
               <div style="font-size:14px;font-weight:600">Proyección del mes</div>
-              <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:99px;border:1.5px solid {{ showFixed ? 'var(--accent)' : 'var(--cb)' }};background:{{ showFixed ? 'var(--accent)' : 'transparent' }};color:{{ showFixed ? '#fff' : 'var(--muted)' }};cursor:pointer">+ Fijo</button>
+              <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:99px;border:1.5px solid {{ showFixed ? 'var(--accent)' : 'var(--cb)' }};background:{{ showFixed ? 'var(--accent)' : 'transparent' }};color:{{ showFixed ? '#fff' : 'var(--muted)' }};cursor:pointer">{{ showFixed ? 'Solo var' : '+ Fijo' }}</button>
             </div>
             <div style="font-size:11px;color:var(--muted)">{{ chartSubtitle }} · {{ chartDayLabel }}</div>
           </div>
@@ -1812,18 +1814,28 @@
         </div>
       </sc-for>
 
-      <!-- recientes -->
-      <div style="font-size:15px;font-weight:600;margin:22px 4px 8px">Movimientos recientes</div>
-      <sc-for list="{{ recent }}" as="r" hint-placeholder-count="5">
-        <div style="display:flex;align-items:center;gap:12px;padding:10px 2px">
-          <div style="width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:{{ r.color }}">{{ r.icon }}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</div>
-            <div style="font-size:11.5px;color:var(--muted)">{{ r.catName }}</div>
-          </div>
-          <span style="font-family:var(--fnum);font-size:13.5px;font-weight:600">{{ r.amountFmt }}</span>
+      <!-- donut por categoría -->
+      <div style="display:flex;align-items:center;gap:14px;margin-top:10px;margin-bottom:4px">
+        <svg width="90" height="90" viewBox="0 0 120 120" style="flex:none">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--subtle)" stroke-width="14"/>
+          <sc-for list="{{ catDonutArcs }}" as="arc" hint-placeholder-count="5">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="{{ arc.color }}" stroke-width="14"
+              stroke-dasharray="{{ arc.dash }} 314.16"
+              stroke-dashoffset="{{ arc.offset }}"
+              transform="rotate(-90 60 60)"/>
+          </sc-for>
+        </svg>
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <sc-for list="{{ catRows }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:7px;font-size:11px">
+              <div style="width:8px;height:8px;border-radius:99px;background:{{ c.color }};flex:none"></div>
+              <span style="flex:1;color:var(--ink);font-weight:500">{{ c.name }}</span>
+              <span style="font-family:var(--fnum);font-weight:600">{{ c.amountFmt }}</span>
+              <span style="color:var(--muted);width:26px;text-align:right">{{ c.pct }}%</span>
+            </div>
+          </sc-for>
         </div>
-      </sc-for>
+      </div>
     </div>
     </sc-if>
 
@@ -1899,19 +1911,30 @@
                 <span style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(47,107,216,.12);padding:3px 9px;border-radius:6px">✓ Pagado</span>
               </sc-if>
             </div>
-            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-              <sc-for list="{{ fp.cuotaBoxes }}" as="c" hint-placeholder-count="2">
-                <button onClick="{{ c.toggle }}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1.5px solid {{ c.checkBd }};background:{{ c.checkBg }};cursor:pointer">
-                  <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
-                    <svg width="11" height="9" viewBox="0 0 12 10" fill="none"><polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <sc-if value="{{ fp.cuotas <= 1 }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-top:12px">
+                <button onClick="{{ fp.cuotaBoxes[0].toggle }}" style="width:24px;height:24px;border-radius:7px;border:1.5px solid {{ fp.cuotaBoxes[0].checkBd }};background:{{ fp.cuotaBoxes[0].checkBg }};flex:none;cursor:pointer;display:flex;align-items:center;justify-content:center">
+                  <sc-if value="{{ fp.cuotaBoxes[0].on }}" hint-placeholder-val="{{ false }}">
+                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </sc-if>
-                  <sc-if value="{{ !c.on }}" hint-placeholder-val="{{ true }}">
-                    <div style="width:11px;height:9px"></div>
-                  </sc-if>
-                  <span style="font-size:11px;font-weight:600;color:{{ c.on ? '#fff' : 'var(--ink)' }}">{{ c.label }}</span>
                 </button>
-              </sc-for>
-            </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ fp.cuotas > 1 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+                <sc-for list="{{ fp.cuotaBoxes }}" as="c" hint-placeholder-count="2">
+                  <button onClick="{{ c.toggle }}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1.5px solid {{ c.checkBd }};background:{{ c.checkBg }};cursor:pointer">
+                    <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+                      <svg width="11" height="9" viewBox="0 0 12 10" fill="none"><polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </sc-if>
+                    <sc-if value="{{ !c.on }}" hint-placeholder-val="{{ true }}">
+                      <div style="width:11px;height:9px"></div>
+                    </sc-if>
+                    <span style="font-size:11px;font-weight:600;color:{{ c.on ? '#fff' : 'var(--ink)' }}">{{ c.label }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
             <sc-if value="{{ fp.anyDone }}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--cb);display:flex;flex-direction:column;gap:10px">
                 <div style="display:flex;align-items:center;gap:10px">
@@ -2047,9 +2070,11 @@
                 <input value="{{ cf.name }}" onInput="{{ cf.onName }}" placeholder="Nombre" style="flex:1;padding:8px 10px;border:1px solid var(--cb);border-radius:10px;font-size:13px;background:var(--bg);color:var(--fg)"/>
                 <button onClick="{{ cf.onDel }}" style="padding:8px 11px;border:none;background:rgba(184,71,46,.12);color:#b8472e;border-radius:10px;font-size:14px;cursor:pointer">✕</button>
               </div>
-              <div style="display:flex;align-items:center;gap:5px;margin-top:6px">
+              <div style="display:flex;align-items:center;gap:4px;margin-top:6px">
                 <span style="font-size:11px;color:var(--muted)">Cuotas/mes</span>
-                <input type="text" inputmode="numeric" value="{{ cf.cuotas }}" onInput="{{ cf.onCuotas }}" style="width:44px;font-size:12px;font-weight:600;text-align:center;background:var(--subtle);border:none;border-radius:7px;padding:5px 6px;color:var(--ink)"/>
+                <button onClick="{{ cf.decCuotas }}" style="width:24px;height:24px;border-radius:99px;border:1px solid var(--cb);background:var(--card);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink)">−</button>
+                <span style="font-family:var(--fnum);font-size:13px;font-weight:700;min-width:18px;text-align:center">{{ cf.cuotas }}</span>
+                <button onClick="{{ cf.incCuotas }}" style="width:24px;height:24px;border-radius:99px;border:1px solid var(--cb);background:var(--card);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink)">+</button>
               </div>
             </div>
           </sc-for>
@@ -2241,6 +2266,24 @@
         </div>
       </div>
 
+      <div style="background:var(--subtle);border-radius:16px;padding:15px 18px;margin-top:10px">
+        <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:10px">Forecast vs presupuesto anual</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:12px;color:var(--muted)">Total gasto año</span>
+          <div style="text-align:right">
+            <span style="font-family:var(--fnum);font-size:14px;font-weight:600">{{ totalGastoAnhoFmt }}</span>
+            <span style="font-size:11px;font-weight:700;color:{{ complianceGastoColor }};margin-left:8px">{{ complianceGasto }}%</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--muted)">+ Ingreso extra</span>
+          <div style="text-align:right">
+            <span style="font-family:var(--fnum);font-size:14px;font-weight:600">{{ totalConIngresoFmt }}</span>
+            <span style="font-size:11px;font-weight:700;color:{{ complianceConIngresoColor }};margin-left:8px">{{ complianceConIngreso }}%</span>
+          </div>
+        </div>
+      </div>
+
       <!-- control por item -->
       <div style="font-size:15px;font-weight:600;margin:24px 4px 4px">Control por ítem</div>
       <div style="font-size:11.5px;color:var(--muted);margin:0 4px 12px">Gastos grandes o fuera de lo común, mes a mes vs presupuesto. Toca un mes para comentar o importar su Excel.</div>
@@ -2362,6 +2405,10 @@
     </button>
   </sc-if>
 
+
+  <sc-if value="{{ showUndo }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ doUndo }}" style="position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:#222;color:#fff;font-size:13px;font-weight:600;padding:10px 24px;border-radius:99px;border:none;cursor:pointer;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.25)">↩ Deshacer</button>
+  </sc-if>
 
   <!-- bottom nav -->
   <div style="position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;height:58px;background:var(--card);border-top:1px solid var(--cb);display:flex;align-items:center;padding:0 8px;z-index:15">
@@ -2667,6 +2714,7 @@ class Component extends DCLogic {
       imEditing: {key:null,text:''},
       itemBudgets: {luz:0,mecanico:0,rego:0,viajes:0,otros:0},
       editingExpense: null,
+      _undoSnapshot: null,
       budgetMsg: '',
       darkMode: false,
       closedMonths: {},
@@ -2761,7 +2809,18 @@ class Component extends DCLogic {
   setTab(t){ this.setState({tab:t}); }
   toggleCurrency(){ this.setState(s=>({currency:s.currency==='AUD'?'CLP':'AUD'})); }
   setDraft(f,v){ this.setState(s=>({draft:{...s.draft,[f]:v}})); }
-  deleteExpense(id){ this.setState(s=>({expenses:s.expenses.filter(e=>e.id!==id)})); }
+  pushUndo(){
+    const snap={expenses:[...this.state.expenses]};
+    this.setState({_undoSnapshot:snap});
+    if(this._undoTimer) clearTimeout(this._undoTimer);
+    this._undoTimer=setTimeout(()=>this.setState({_undoSnapshot:null}),1500);
+  }
+  undo(){
+    if(!this.state._undoSnapshot) return;
+    clearTimeout(this._undoTimer);
+    this.setState({expenses:this.state._undoSnapshot.expenses, _undoSnapshot:null});
+  }
+  deleteExpense(id){ this.pushUndo(); this.setState(s=>({expenses:s.expenses.filter(e=>e.id!==id)})); }
   openEdit(id){
     const e=this.state.expenses.find(x=>x.id===id); if(!e) return;
     this.setState({showAdd:true,draft:{amount:String(e.amount),cat:e.cat,label:e.label||'',date:e.date,pm:e.pm||'amex'},editingExpense:id});
@@ -2772,6 +2831,7 @@ class Component extends DCLogic {
     if(!(amt>0)) return;
     const rec=this.recurring.find(r=>r.id===d.cat);
     const label=(d.label||'').trim()||(this.cat[d.cat]?.name||d.cat);
+    this.pushUndo();
     if(this.state.editingExpense){
       const orig=this.state.expenses.find(e=>e.id===this.state.editingExpense);
       const updated={...orig,date:d.date,cat:d.cat,label,amount:amt,rec:rec?d.cat:undefined,pm:d.pm};
@@ -3134,7 +3194,7 @@ class Component extends DCLogic {
       const list=(g==='Recurrentes'?this.recurring:this.variable.filter(c=>c.group===g));
       return {group:g,color:this.gc[g]||'#9ca3af',cats:list.map(c=>{const on=S.draft.cat===c.id;return{name:c.name,pick:()=>this.setDraft('cat',c.id),border:on?c.color:'var(--cb)',bg:on?c.color:'var(--card)',fg:on?'#fff':'var(--ink)'};})};
     });
-    const catEdFixes=(S.fixedDefs||[]).map(f=>({name:f.name,onName:e=>this.setFixedName(f.id,e.target.value),onDel:()=>this.delFixed(f.id),cuotas:f.cuotas||1,onCuotas:e=>this.setFixedCuotas(f.id,e.target.value)}));
+    const catEdFixes=(S.fixedDefs||[]).map(f=>({name:f.name,onName:e=>this.setFixedName(f.id,e.target.value),onDel:()=>this.delFixed(f.id),cuotas:f.cuotas||1,decCuotas:()=>this.setFixedCuotas(f.id,(f.cuotas||1)-1),incCuotas:()=>this.setFixedCuotas(f.id,(f.cuotas||1)+1)}));
     const catEdRecurr=(S.recurringDefs||[]).map(r=>({name:r.name,onName:e=>this.setRecurringName(r.id,e.target.value),onDel:()=>this.delRecurring(r.id)}));
     const catEdGroups=(S.variableGroups||[]).map(g=>({group:g,color:this.gc[g]||'#9ca3af',onRename:e=>this.renameGroup(g,e.target.value),onDelGroup:()=>this.delGroup(g),onAddItem:()=>this.addVariable(g),items:this.variable.filter(v=>v.group===g).map(v=>({name:v.name,onName:e=>this.setVariableName(v.id,e.target.value),onDel:()=>this.delVariable(v.id)}))}));
     const draftRecurring=!!this.recurring.find(r=>r.id===S.draft.cat);
@@ -3231,6 +3291,9 @@ class Component extends DCLogic {
     const catL=this.variable.map(c=>({c,actual:this.catActual(c.id,this.curMonth)})).filter(o=>o.actual>0).sort((a,b)=>b.actual-a.actual);
     const catMax=catL.length?catL[0].actual:1, catTot=catL.reduce((s,o)=>s+o.actual,0)||1;
     const catRows=catL.map(o=>({name:o.c.name,color:o.c.color,icon:this.icon(o.c.group),amountFmt:this.fmt0(o.actual),pct:Math.round(o.actual/catTot*100),barWidth:Math.max(8,o.actual/catMax*100)}));
+    const CIRC=2*Math.PI*50;
+    let catOffset=0;
+    const catDonutArcs=catRows.map(o=>{const dash=o.pct/100*CIRC;const arc={color:o.color,dash:dash.toFixed(2),offset:(-catOffset).toFixed(2)};catOffset+=dash;return arc;});
 
     // ---- control por ítem (Anual) ----
     const its=this.items, im=S.itemMatrix;
@@ -3244,7 +3307,7 @@ class Component extends DCLogic {
       if(itemId) itemActuals[itemId][mi2]+=e.amount;
     });
     const itemGasto={}; its.forEach(it=>{
-      itemGasto[it.id]=new Array(12).fill(0).reduce((_,__,mi2)=>_+Math.round(itemActuals[it.id][mi2])||im[it.id][mi2],0);
+      itemGasto[it.id]=new Array(12).fill(0).reduce((acc,_,mi2)=>acc+(Math.round(itemActuals[it.id][mi2])||im[it.id][mi2]),0);
     });
     const gastoAnoTot=its.reduce((a,it)=>a+itemGasto[it.id],0);
     const presupTot=its.reduce((a,it)=>a+(S.itemBudgets?.[it.id]??it.budget),0);
@@ -3285,6 +3348,15 @@ class Component extends DCLogic {
     }
     const sumA=(a)=>a.reduce((x,y)=>x+(y||0),0);
     const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
+    let varActualAnualizado=0;
+    for(let mi=0;mi<12;mi++){
+      if(mi<=this.curMonth) varActualAnualizado+=this.monthData(mi).variableLogged;
+      else varActualAnualizado+=this.variableBudgetTotal;
+    }
+    const totalGastoAnho=cajaGastoTot+varActualAnualizado;
+    const complianceGasto=cajaPptoTot>0?Math.round(totalGastoAnho/cajaPptoTot*100):0;
+    const totalConIngreso=totalGastoAnho+ingresoTot;
+    const complianceConIngreso=cajaPptoTot>0?Math.round(totalConIngreso/cajaPptoTot*100):0;
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
     const balanceCajaAnual=cajaFinalAnualTot;
     // projected caja final: past months use actuals, future months use plan
@@ -3384,9 +3456,12 @@ class Component extends DCLogic {
       varAvailFmt:this.fmt0(Math.abs(this.variableBudgetTotal-md.variableLogged)), varAvailColor:(this.variableBudgetTotal-md.variableLogged)>=0?'#3f8f63':'#b8472e', varBudgetFmt:this.fmt0(this.variableBudgetTotal),
       fixPieDash:(()=>{const pct=this.fixedTotal>0?Math.max(0,Math.min(100,(this.fixedTotal-md.fixedActual)/this.fixedTotal*100)):100;return (pct/100*87.96).toFixed(2)+' 87.96';})(),
       varPieDash:(()=>{const pct=this.variableBudgetTotal>0?Math.max(0,Math.min(100,(this.variableBudgetTotal-md.variableLogged)/this.variableBudgetTotal*100)):100;return (pct/100*87.96).toFixed(2)+' 87.96';})(),
+      fixUsedPct:this.fixedTotal>0?Math.min(999,Math.round(md.fixedActual/this.fixedTotal*100)):0,
+      varUsedPct:this.variableBudgetTotal>0?Math.min(999,Math.round(md.variableLogged/this.variableBudgetTotal*100)):0,
       dailyLeftFmt:this.fmt0(Math.max(0,dailyLeft)), daysLeftLabel:daysLeft+' días · por día',
       todayFmt:this.fmt0(todaySpent), avgFmt:this.fmt0(variableBurn), projFmt:this.fmt0(projection), projColor:projection>md.budget?'#b8472e':'#3f8f63',
-      topCats, recent,
+      topCats, recent, catDonutArcs,
+      showUndo:!!S._undoSnapshot, doUndo:()=>this.undo(),
 
       // diario tabs
       dIsReg, dIsFijos, fixedPayList, fixedPaidCount, fixedPaidTotal, fixedCount:this.fixed.length,
@@ -3415,8 +3490,10 @@ class Component extends DCLogic {
       difTotFmt:(difTot<0?'−':'+')+this.fmt0(Math.abs(difTot)), difTotColor:difTot<0?'#b8472e':'#3f8f63',
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
       cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaGastoTotFmt:this.fmt0(cajaGastoTot), cajaFinalAnualFmt:this.fmt0(cajaFinalAnualTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual, pctCajaProyectado,
+      totalGastoAnhoFmt:this.fmt0(totalGastoAnho), complianceGasto, complianceGastoColor:complianceGasto<=100?'#3f8f63':complianceGasto<=110?'#c08a2e':'#b8472e',
+      totalConIngresoFmt:this.fmt0(totalConIngreso), complianceConIngreso, complianceConIngresoColor:complianceConIngreso<=100?'#3f8f63':complianceConIngreso<=110?'#c08a2e':'#b8472e',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.0',
+      appVersion:'v2.1',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
