@@ -2180,23 +2180,22 @@
     <!-- ============ ANUAL ============ -->
     <sc-if value="{{ isAnual }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Anual">
-      <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:18px 20px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div>
-            <div style="font-size:12px;color:var(--muted);font-weight:500">Gastado {{ yearLabel }} · a la fecha</div>
-            <div style="font-family:var(--fnum);font-size:26px;font-weight:600;margin-top:3px">{{ ytdActualFmt }}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:12px;color:var(--muted);font-weight:500">Presup. a la fecha</div>
-            <div style="font-family:var(--fnum);font-size:15px;font-weight:600;margin-top:3px">{{ ytdBudgetFmt }}</div>
-          </div>
+      <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:18px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:10px;color:var(--muted);font-weight:500;margin-bottom:4px">Ppto anual</div>
+          <div style="font-family:var(--fnum);font-size:18px;font-weight:700">{{ annualBudgetFmt }}</div>
         </div>
-        <div style="height:8px;background:var(--subtle);border-radius:99px;margin-top:14px;overflow:hidden">
-          <div style="height:100%;border-radius:99px;width:{{ ytdBar }}%;background:{{ ytdColor }}"></div>
+        <div style="width:1px;background:var(--cb);align-self:stretch"></div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:10px;color:var(--muted);font-weight:500;margin-bottom:4px">Total gasto año</div>
+          <div style="font-family:var(--fnum);font-size:18px;font-weight:700;color:{{ complianceGastoColor }}">{{ totalGastoAnhoFmt }}</div>
+          <div style="font-size:10px;font-weight:700;color:{{ complianceGastoColor }};margin-top:2px">{{ complianceGasto }}%</div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:12px">
-          <span style="color:{{ ytdColor }};font-weight:600">{{ ytdPct }}% del presupuesto</span>
-          <span style="color:var(--muted)">{{ ytdRemainLabel }} <b style="font-family:var(--fnum);color:var(--ink)">{{ ytdRemainFmt }}</b></span>
+        <div style="width:1px;background:var(--cb);align-self:stretch"></div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:10px;color:var(--muted);font-weight:500;margin-bottom:4px">+ Ingreso extra</div>
+          <div style="font-family:var(--fnum);font-size:18px;font-weight:700;color:{{ complianceConIngresoColor }}">{{ totalConIngresoFmt }}</div>
+          <div style="font-size:10px;font-weight:700;color:{{ complianceConIngresoColor }};margin-top:2px">{{ complianceConIngreso }}%</div>
         </div>
       </div>
 
@@ -3096,21 +3095,21 @@ class Component extends DCLogic {
 
     // anual
     const months=[]; let ytdA=0;
-    let maxV=this.monthBudget;
-    const actuals=[];
+    const cjPpto=S.caja?.ppto||[];
+    const monthBudgetPlan=this.fixedTotal+this.variableBudgetTotal;
+    const gapVals=[];
     for(let mi=0;mi<12;mi++){
-      let a; let future=false;
+      let a; let future=mi>this.curMonth;
       if(S.importedTotals[mi]!=null) a=S.importedTotals[mi];
       else if(mi<this.curMonth) a=this.monthlyActuals[mi]||0;
       else if(mi===this.curMonth) a=md.realActual;
-      else { a=this.monthBudget; future=true; }
-      actuals.push({a,future,mi});
-      if(!future) maxV=Math.max(maxV,a);
+      else a=this.monthBudget;
       if(mi<=this.curMonth) ytdA+=a;
+      gapVals.push({gapV:monthBudgetPlan-(cjPpto[mi]||0),mi,future});
     }
-    actuals.forEach(o=>{
-      const p=o.a/this.monthBudget*100;
-      months.push({abbr:this.monthAbbr[o.mi],barH:Math.max(4,Math.round(o.a/maxV*88)),color:o.future?'#cfcabd':this.sHex(p),opacity:o.future?0.55:1,labelColor:o.mi===this.curMonth?'var(--ink)':'var(--muted)'});
+    const maxGap=Math.max(1,...gapVals.map(g=>Math.abs(g.gapV)));
+    gapVals.forEach(g=>{
+      months.push({abbr:this.monthAbbr[g.mi],barH:Math.max(2,Math.round(Math.abs(g.gapV)/maxGap*88)),color:g.gapV>0?'#b8472e':'#3f8f63',opacity:g.future?0.5:1,labelColor:g.mi===this.curMonth?'var(--ink)':'var(--muted)'});
     });
     const ytdBudget=this.monthBudget*(this.curMonth+1);
     const ytdPct=Math.round(ytdA/ytdBudget*100);
@@ -3285,7 +3284,7 @@ class Component extends DCLogic {
     const totalGastoAnho=cajaGastoTot-(fixedAnual+variableAnual);
     const annualBudgetPresup=this.monthBudget*12;
     const complianceGasto=annualBudgetPresup>0?Math.round(Math.abs(totalGastoAnho)/annualBudgetPresup*100):0;
-    const totalConIngreso=totalGastoAnho-ingresoTot;
+    const totalConIngreso=totalGastoAnho+ingresoTot;
     const complianceConIngreso=annualBudgetPresup>0?Math.round(Math.abs(totalConIngreso)/annualBudgetPresup*100):0;
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
     const balanceCajaAnual=cajaFinalAnualTot;
@@ -3420,6 +3419,7 @@ class Component extends DCLogic {
 
       // anual
       yearLabel:String(this.year),
+      annualBudgetFmt:this.fmt0(annualBudget),
       ytdActualFmt:this.fmt0(ytdA), ytdBudgetFmt:this.fmt0(ytdBudget), ytdBar:Math.min(100,ytdA/ytdBudget*100), ytdColor:this.sHex(ytdA/ytdBudget*100), ytdPct,
       ytdRemainLabel:ytdA<=ytdBudget?'Ahorrado':'Excedido', ytdRemainFmt:this.fmt0(Math.abs(ytdBudget-ytdA)),
       months, projectedFmt:(difProyectado>=0?'+':'-')+this.fmt0(Math.abs(difProyectado)), projColor2:difProyectado>=0?'#3f8f63':'#b8472e',
@@ -3432,7 +3432,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.5',
+      appVersion:'v2.6',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
