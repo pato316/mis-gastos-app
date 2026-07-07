@@ -2404,7 +2404,7 @@
 
   <!-- FAB -->
   <sc-if value="{{ showFab }}" hint-placeholder-val="{{ true }}">
-    <button onClick="{{ openAdd }}" style="position:absolute;right:20px;bottom:96px;width:56px;height:56px;border-radius:50%;border:none;background:rgba(47,107,216,0.75);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(40,36,28,.4);z-index:20;backdrop-filter:blur(4px)">
+    <button onClick="{{ openAdd }}" style="position:absolute;right:20px;bottom:96px;width:56px;height:56px;border-radius:50%;border:none;background:rgba(47,107,216,0.45);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(40,36,28,.2);z-index:20;backdrop-filter:blur(6px)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
     </button>
   </sc-if>
@@ -2782,12 +2782,17 @@ class Component extends DCLogic {
   _syncCats(){
     const S=this.state;
     this.fixed=(S.fixedDefs||[]).map(f=>({...f,group:'Fijos',color:this.gc.Fijos}));
-    this.recurring=(S.recurringDefs||[]).map(r=>({...r,group:'Recurrentes',color:this.gc.Recurrentes,due:this._computeDue(r.interval)}));
+    this.recurring=(S.recurringDefs||[]).map(r=>{
+      const cfg=S.recurringConfig?.[r.id];
+      const interval=cfg?.interval??r.interval;
+      const amount=cfg?.amount!=null?cfg.amount:r.amount;
+      return {...r,amount,interval,group:'Recurrentes',color:this.gc.Recurrentes,due:this._computeDue(interval)};
+    });
     this.variable=(S.variableDefs||[]).map(v=>({...v,color:this.gc[v.group]||this.gc.Personal}));
     this.cat={}; [...this.fixed,...this.recurring,...this.variable].forEach(c=>{this.cat[c.id]=c;});
   }
-  _rc(c){ const cfg=this.state?.recurringConfig?.[c.id]; return cfg?{...c,...cfg}:c; }
-  get recurringAmortTotal(){ return this.recurring.map(c=>this._rc(c)).reduce((s,c)=>s+c.amount/c.interval,0); }
+  _rc(c){ return c; }
+  get recurringAmortTotal(){ return this.recurring.reduce((s,c)=>s+c.amount/c.interval,0); }
   get monthBudget(){ return this.fixedTotal+this.variableBudgetTotal+this.recurringAmortTotal; }
 
   monthKey(mi){ return this.year+'-'+String(mi+1).padStart(2,'0'); }
@@ -3355,11 +3360,11 @@ class Component extends DCLogic {
     const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
     const fixedAnual=this.fixedTotal*12;
     const variableAnual=this.variableBudgetTotal*12;
-    const totalGastoAnho=fixedAnual+variableAnual+cajaGastoTot;
+    const totalGastoAnho=cajaGastoTot-fixedAnual-variableAnual;
     const annualBudgetPresup=this.monthBudget*12;
-    const complianceGasto=annualBudgetPresup>0?Math.round(totalGastoAnho/annualBudgetPresup*100):0;
+    const complianceGasto=annualBudgetPresup>0?Math.round(Math.abs(totalGastoAnho)/annualBudgetPresup*100):0;
     const totalConIngreso=totalGastoAnho+ingresoTot;
-    const complianceConIngreso=annualBudgetPresup>0?Math.round(totalConIngreso/annualBudgetPresup*100):0;
+    const complianceConIngreso=annualBudgetPresup>0?Math.round(Math.abs(totalConIngreso)/annualBudgetPresup*100):0;
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
     const balanceCajaAnual=cajaFinalAnualTot;
     // projected caja final: past months use actuals, future months use plan
@@ -3502,10 +3507,10 @@ class Component extends DCLogic {
       difTotFmt:(difTot<0?'−':'+')+this.fmt0(Math.abs(difTot)), difTotColor:difTot<0?'#b8472e':'#3f8f63',
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
       cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaGastoTotFmt:this.fmt0(cajaGastoTot), cajaFinalAnualFmt:this.fmt0(cajaFinalAnualTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual, pctCajaProyectado,
-      totalGastoAnhoFmt:this.fmt0(totalGastoAnho), complianceGasto, complianceGastoColor:complianceGasto<=100?'#3f8f63':complianceGasto<=110?'#c08a2e':'#b8472e',
-      totalConIngresoFmt:this.fmt0(totalConIngreso), complianceConIngreso, complianceConIngresoColor:complianceConIngreso<=100?'#3f8f63':complianceConIngreso<=110?'#c08a2e':'#b8472e',
+      totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:totalGastoAnho>=0?'#3f8f63':'#b8472e',
+      totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:totalConIngreso>=0?'#3f8f63':'#b8472e',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.2',
+      appVersion:'v2.3',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
