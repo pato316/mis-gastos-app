@@ -1760,7 +1760,7 @@
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:16px 16px 12px;margin-top:12px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
           <div style="display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0">
-            <div style="font-size:14px;font-weight:600;white-space:nowrap">Proyección del mes</div>
+            <div style="font-size:11px;font-weight:600;white-space:nowrap">Proyección del mes</div>
             <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;border:1.5px solid {{ chartFixedBtnBd }};background:{{ chartFixedBtnBg }};color:{{ chartFixedBtnFg }};cursor:pointer;min-width:52px;max-width:52px;white-space:nowrap;flex:none">{{ chartFixedBtnLabel }}</button>
             <div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ chartDayLabel }}</div>
           </div>
@@ -1774,7 +1774,6 @@
             <line x1="{{ chartPadL }}" y1="{{ yt.y }}" x2="312" y2="{{ yt.y }}" stroke="#e8e3db" stroke-width="0.6"/>
             <text x="43" y="{{ yt.y }}" fill="#a09890" font-size="8" text-anchor="end" dominant-baseline="middle">{{ yt.label }}</text>
           </sc-for>
-          <line x1="{{ chartPadL }}" y1="{{ chartMetaY }}" x2="312" y2="{{ chartMetaY }}" stroke="#b8b2a6" stroke-width="1" stroke-dasharray="3 3"/>
           <path d="{{ chartRealArea }}" fill="rgba(122,160,232,.20)"/>
           <polyline points="{{ chartPlanPts }}" fill="none" stroke="#3a5fcd" stroke-width="2" stroke-linecap="round"/>
           <polyline points="{{ chartRealPts }}" fill="none" stroke="#5b82da" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -2183,20 +2182,22 @@
     <!-- ============ ANUAL ============ -->
     <sc-if value="{{ isAnual }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Anual">
-      <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:6px">
-        <div style="flex:1;text-align:center">
-          <div style="font-size:9px;color:var(--muted);font-weight:500;margin-bottom:3px">Ppto anual</div>
-          <div style="font-family:var(--fnum);font-size:16px;font-weight:700">{{ annualBudgetFmt }}</div>
+      <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:12px 10px;display:flex;justify-content:space-between;align-items:center;gap:4px">
+        <div style="flex:1;text-align:center;min-width:0">
+          <div style="font-size:8.5px;color:var(--muted);font-weight:500;margin-bottom:2px;white-space:nowrap">Ppto anual</div>
+          <div style="font-family:var(--fnum);font-size:13px;font-weight:700;white-space:nowrap">{{ annualBudgetFmt }}</div>
         </div>
-        <div style="width:1px;background:var(--cb);height:36px"></div>
-        <div style="flex:1;text-align:center">
-          <div style="font-size:9px;color:var(--muted);font-weight:500;margin-bottom:3px">Total gasto año</div>
-          <div style="font-family:var(--fnum);font-size:16px;font-weight:700">{{ totalGastoAnhoAbsFmt }}</div>
+        <div style="width:1px;background:var(--cb);height:32px;flex:none"></div>
+        <div style="flex:1;text-align:center;min-width:0">
+          <div style="font-size:8.5px;color:var(--muted);font-weight:500;margin-bottom:2px;white-space:nowrap">Total gasto año</div>
+          <div style="font-family:var(--fnum);font-size:13px;font-weight:700;white-space:nowrap">{{ totalGastoAnhoAbsFmt }}</div>
+          <div style="font-size:9px;font-weight:700;color:{{ complianceGastoColor }};margin-top:1px">{{ complianceGasto }}%</div>
         </div>
-        <div style="width:1px;background:var(--cb);height:36px"></div>
-        <div style="flex:1;text-align:center">
-          <div style="font-size:9px;color:var(--muted);font-weight:500;margin-bottom:3px">+ Ingreso extra</div>
-          <div style="font-family:var(--fnum);font-size:16px;font-weight:700">{{ totalConIngresoAbsFmt }}</div>
+        <div style="width:1px;background:var(--cb);height:32px;flex:none"></div>
+        <div style="flex:1;text-align:center;min-width:0">
+          <div style="font-size:8.5px;color:var(--muted);font-weight:500;margin-bottom:2px;white-space:nowrap">+ Ingreso extra</div>
+          <div style="font-family:var(--fnum);font-size:13px;font-weight:700;white-space:nowrap">{{ totalConIngresoAbsFmt }}</div>
+          <div style="font-size:9px;font-weight:700;color:{{ complianceConIngresoColor }};margin-top:1px">{{ complianceConIngreso }}%</div>
         </div>
       </div>
 
@@ -3100,6 +3101,7 @@ class Component extends DCLogic {
     // anual
     const months=[]; let ytdA=0;
     const cjPpto=S.caja?.ppto||[];
+    const cjPct=S.caja?.pct||[];
     const monthBudgetPlan=this.fixedTotal+this.variableBudgetTotal;
     const gapVals=[];
     for(let mi=0;mi<12;mi++){
@@ -3116,8 +3118,8 @@ class Component extends DCLogic {
     gapVals.forEach(g=>{
       const cajaMi=cjPpto[g.mi]||0;
       const gapV=cajaMi-monthBudgetPlan;
-      const pct=monthBudgetPlan>0?Math.round(cajaMi/monthBudgetPlan*100):0;
-      const color=pct>=100?'#3f8f63':'#b8472e';
+      const pct=cjPct[g.mi]||0;
+      const color=pct<100?'#3f8f63':'#b8472e';
       const barH=Math.max(2,Math.round(Math.abs(gapV)/maxGap*88));
       const isSel=selMi===g.mi;
       months.push({abbr:this.monthAbbr[g.mi],barH,color,opacity:g.future?0.5:1,
@@ -3452,7 +3454,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.8',
+      appVersion:'v2.9',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
