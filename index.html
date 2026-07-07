@@ -1762,7 +1762,7 @@
           <div>
             <div style="display:flex;align-items:center;gap:8px">
               <div style="font-size:14px;font-weight:600">Proyección del mes</div>
-              <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:99px;border:1.5px solid {{ chartFixedBtnBd }};background:{{ chartFixedBtnBg }};color:{{ chartFixedBtnFg }};cursor:pointer">{{ chartFixedBtnLabel }}</button>
+              <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;border:1.5px solid {{ chartFixedBtnBd }};background:{{ chartFixedBtnBg }};color:{{ chartFixedBtnFg }};cursor:pointer;min-width:52px;max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ chartFixedBtnLabel }}</button>
             </div>
             <div style="font-size:11px;color:var(--muted)">{{ chartSubtitle }} · {{ chartDayLabel }}</div>
           </div>
@@ -2030,8 +2030,8 @@
               <input type="number" value="{{ rc.amount }}" onFocus="{{ rc.onFocusAmount }}" onInput="{{ rc.onAmount }}" onBlur="{{ rc.onBlurAmount }}" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
             </div>
             <div style="flex:1">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Cada X meses</div>
-              <input type="number" value="{{ rc.interval }}" onFocus="{{ rc.onFocusInterval }}" onInput="{{ rc.onInterval }}" onBlur="{{ rc.onBlurInterval }}" min="1" max="12" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Cuotas/año</div>
+              <input type="text" inputmode="numeric" value="{{ rc.cuotasAnio }}" onFocus="{{ rc.onFocusInterval }}" onInput="{{ rc.onInterval }}" onBlur="{{ rc.onBlurInterval }}" style="width:100%;padding:6px 8px;border:1px solid var(--cb);border-radius:8px;font-size:13px;background:var(--bg);color:var(--fg);font-family:var(--fnum);box-sizing:border-box"/>
             </div>
           </div>
         </div>
@@ -2316,11 +2316,6 @@
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:16px 18px;margin-top:12px">
         <div style="font-size:12px;color:var(--muted)">Balance de caja anual</div>
         <div style="font-family:var(--fnum);font-size:25px;font-weight:600;margin-top:3px;color:{{ balanceCajaColor }}">{{ balanceCajaAnualFmt }}</div>
-        <div style="margin-top:13px;border-top:1px solid var(--cb);padding-top:11px;display:flex;flex-direction:column;gap:7px;font-size:12px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Presupuesto total anual</span><b style="font-family:var(--fnum)">{{ cajaPptoTotFmt }}</b></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Total gasto año</span><b style="font-family:var(--fnum)">{{ totalGastoAnhoFmt }}</b></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Caja con ingreso extra</span><b style="font-family:var(--fnum);color:var(--accent)">{{ cajaFinalAnualFmt }}</b></div>
-        </div>
       </div>
       <div style="height:8px"></div>
     </div>
@@ -3093,7 +3088,7 @@ class Component extends DCLogic {
       onInput:(e)=>{const t=e.target.value;this.setState({editing:{id,text:t}});this.setBudget(id,t);},
       onBlur:()=>this.setState({editing:{id:null,text:''}}), isEd};};
     const fixedList=this.fixed.map(f=>{const h=lineH(f.id);const b=this.budgetOf(f.id);return{name:f.name,value:h.isEd?S.editing.text:editVal(b),suffix:psuf,onFocus:h.onFocus,onInput:h.onInput,onBlur:h.onBlur};});
-    const recurringList=this.recurring.map(c=>{const rc=this._rc(c);const kA=c.id+'_amount',kI=c.id+'_interval';const edA=S.rcEditing.key===kA,edI=S.rcEditing.key===kI;return{name:rc.name,amount:edA?S.rcEditing.text:String(rc.amount),interval:edI?S.rcEditing.text:String(rc.interval),perFmt:this.fmt0(rc.amount),intervalLabel:c.due.length+' cuota'+(c.due.length!==1?'s':'')+' /año',amortFmt:this.fmt0(rc.amount/rc.interval*pf)+psuf,nextDueLabel:this.nextDue({...c,...rc}),annualFmt:this.fmt0(rc.amount*c.due.length),onAmount:e=>{this.setRcEdit(kA,e.target.value);this.setRecurring(c.id,'amount',e.target.value);},onInterval:e=>{this.setRcEdit(kI,e.target.value);this.setRecurring(c.id,'interval',e.target.value);},onFocusAmount:e=>this.setRcEdit(kA,e.target.value),onFocusInterval:e=>this.setRcEdit(kI,e.target.value),onBlurAmount:()=>this.setState({rcEditing:{key:null,text:''}}),onBlurInterval:()=>this.setState({rcEditing:{key:null,text:''}})};});
+    const recurringList=this.recurring.map(c=>{const rc=this._rc(c);const kA=c.id+'_amount',kI=c.id+'_interval';const edA=S.rcEditing.key===kA,edI=S.rcEditing.key===kI;const cuotasAnio=c.due.length;return{name:rc.name,amount:edA?S.rcEditing.text:String(rc.amount),cuotasAnio:edI?S.rcEditing.text:String(cuotasAnio),perFmt:this.fmt0(rc.amount),intervalLabel:cuotasAnio+' cuota'+(cuotasAnio!==1?'s':'')+' /año',amortFmt:this.fmt0(rc.amount/rc.interval*pf)+psuf,nextDueLabel:this.nextDue({...c,...rc}),annualFmt:this.fmt0(rc.amount*cuotasAnio),onAmount:e=>{this.setRcEdit(kA,e.target.value);this.setRecurring(c.id,'amount',e.target.value);},onInterval:e=>{this.setRcEdit(kI,e.target.value);const n=parseInt(e.target.value)||1;this.setRecurring(c.id,'interval',Math.max(1,Math.round(12/n)));},onFocusAmount:e=>this.setRcEdit(kA,e.target.value),onFocusInterval:e=>this.setRcEdit(kI,String(c.due.length)),onBlurAmount:()=>this.setState({rcEditing:{key:null,text:''}}),onBlurInterval:()=>this.setState({rcEditing:{key:null,text:''}})};});
     const variableList=this.variable.map(c=>{const h=lineH(c.id);const b=this.budgetOf(c.id);const a=this.catActual(c.id,this.curMonth);const p=b?a/b*100:0;return{name:c.name,color:c.color,value:h.isEd?S.editing.text:editVal(b),suffix:psuf,actualFmt:this.fmt0(a*pf)+' gastado',barWidth:Math.min(100,p),barColor:this.sHex(p),onFocus:h.onFocus,onInput:h.onInput,onBlur:h.onBlur};});
     const variableActual=this.variable.reduce((s,c)=>s+this.catActual(c.id,this.curMonth),0);
     const mbp=this.monthBudget;
@@ -3169,14 +3164,15 @@ class Component extends DCLogic {
     const plotW=SVGW-padL-padR;
     const xF=d=>padL+(d-1)/(dim-1)*plotW;
     const yF=v=>plotBot-(v/yMax)*(plotBot-plotTop);
-    const planPts=xF(1).toFixed(1)+','+yF(tracked/dim).toFixed(1)+' '+xF(dim).toFixed(1)+','+yF(planEnd).toFixed(1);
+    const planY1=showFixed?this.fixedTotal:tracked/dim;
+    const planPts=xF(1).toFixed(1)+','+yF(planY1).toFixed(1)+' '+xF(dim).toFixed(1)+','+yF(planEnd).toFixed(1);
     const realPts=realCum.map(p=>xF(p.d).toFixed(1)+','+yF(p.v).toFixed(1)).join(' ');
     let realArea='M '+xF(1).toFixed(1)+','+plotBot; realCum.forEach(p=>{realArea+=' L '+xF(p.d).toFixed(1)+','+yF(p.v).toFixed(1);}); realArea+=' L '+xF(tday).toFixed(1)+','+plotBot+' Z';
     const projArr=[]; for(let d=tday;d<=dim;d++){const v=realToday+burn*(d-tday); projArr.push(xF(d).toFixed(1)+','+yF(v).toFixed(1));}
     const projPts=projArr.join(' ');
     const projOver=projEnd>planEnd;
     const chartTicks=[1,8,15,22,dim].map(d=>({x:xF(d).toFixed(1),label:String(d)}));
-    const planToday=tracked*tday/dim;
+    const planToday=showFixed?(this.fixedTotal+this.variableBudgetTotal*tday/dim):tracked*tday/dim;
     const cumpl=planToday>0?Math.round(realToday/planToday*100):0;
     const cumplHex=cumpl<=100?'#3f8f63':cumpl<=110?'#c08a2e':'#b8472e';
     const cumplMsg=cumpl<=100?'vas bajo el plan':cumpl<=110?'ligeramente sobre el plan':'sobre el plan';
@@ -3286,7 +3282,7 @@ class Component extends DCLogic {
     const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
     const fixedAnual=this.fixedTotal*12;
     const variableAnual=this.variableBudgetTotal*12;
-    const totalGastoAnho=fixedAnual+variableAnual-cajaPptoTot;
+    const totalGastoAnho=cajaGastoTot-(fixedAnual+variableAnual);
     const annualBudgetPresup=this.monthBudget*12;
     const complianceGasto=annualBudgetPresup>0?Math.round(Math.abs(totalGastoAnho)/annualBudgetPresup*100):0;
     const totalConIngreso=totalGastoAnho-ingresoTot;
@@ -3436,7 +3432,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.4',
+      appVersion:'v2.5',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
