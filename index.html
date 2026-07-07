@@ -1819,7 +1819,7 @@
       </sc-for>
 
       <!-- donut por categoría -->
-      <div style="display:flex;align-items:center;gap:14px;margin-top:10px;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:14px;margin-top:10px;margin-bottom:4px;margin-right:70px">
         <svg width="90" height="90" viewBox="0 0 120 120" style="flex:none">
           <circle cx="60" cy="60" r="50" fill="none" stroke="var(--subtle)" stroke-width="14"/>
           <sc-for list="{{ catDonutArcs }}" as="arc" hint-placeholder-count="5">
@@ -2259,18 +2259,7 @@
         <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#b8472e"></span>Excedido</span>
       </div>
 
-      <!-- proyeccion -->
-      <div style="background:var(--subtle);border-radius:16px;padding:15px 18px;margin-top:16px;display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;color:var(--muted);font-weight:500">Proyección cierre {{ yearLabel }}</div>
-          <div style="font-family:var(--fnum);font-size:20px;font-weight:600;margin-top:3px;color:{{ projColor2 }}">{{ projectedFmt }}</div>
-        </div>
-        <div style="text-align:right;font-size:11.5px;color:var(--muted)">
-          Presupuesto anual<br><b style="font-family:var(--fnum);color:var(--ink);font-size:14px">{{ annualBudgetFmt }}</b>
-        </div>
-      </div>
-
-      <div style="background:var(--subtle);border-radius:16px;padding:15px 18px;margin-top:10px">
+      <div style="background:var(--subtle);border-radius:16px;padding:15px 18px;margin-top:16px">
         <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:10px">Forecast vs presupuesto anual</div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:12px;color:var(--muted)">Total gasto año</span>
@@ -2284,68 +2273,6 @@
           <div style="text-align:right">
             <span style="font-family:var(--fnum);font-size:14px;font-weight:600">{{ totalConIngresoFmt }}</span>
             <span style="font-size:11px;font-weight:700;color:{{ complianceConIngresoColor }};margin-left:8px">{{ complianceConIngreso }}%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- control por item -->
-      <div style="font-size:15px;font-weight:600;margin:24px 4px 4px">Control por ítem</div>
-      <div style="font-size:11.5px;color:var(--muted);margin:0 4px 12px">Gastos grandes o fuera de lo común, mes a mes vs presupuesto. Toca un mes para comentar o importar su Excel.</div>
-
-      <div style="background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:16px 18px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end">
-          <div>
-            <div style="font-size:12px;color:var(--muted)">Diferencia anual vs presupuesto</div>
-            <div style="font-family:var(--fnum);font-size:25px;font-weight:600;margin-top:3px;color:{{ difTotColor }}">{{ difTotFmt }}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:11px;color:var(--muted)">Por mes</div>
-            <div style="font-family:var(--fnum);font-size:15px;font-weight:600;margin-top:2px;color:{{ difMesColor }}">{{ difMesFmt }}</div>
-          </div>
-        </div>
-        <div style="display:flex;margin-top:13px;border-top:1px solid var(--cb);padding-top:11px;font-size:11.5px">
-          <div style="flex:1"><span style="color:var(--muted)">Gasto año </span><b style="font-family:var(--fnum)">{{ gastoAnoTotFmt }}</b></div>
-          <div style="flex:1;text-align:right"><span style="color:var(--muted)">Presupuesto </span><b style="font-family:var(--fnum)">{{ presupTotFmt }}</b></div>
-        </div>
-      </div>
-
-      <div style="background:var(--card);border:1px solid var(--cb);border-radius:14px;overflow:hidden">
-        <div style="overflow-x:auto">
-          <div style="min-width:432px">
-            <div style="display:flex;background:var(--subtle);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--muted)">
-              <div style="width:52px;flex:none;padding:8px 8px">Mes</div>
-              <sc-for list="{{ itemHeader }}" as="h" hint-placeholder-count="5">
-                <div style="flex:1;padding:8px 4px;text-align:right;color:{{ h.color }}">{{ h.short }}</div>
-              </sc-for>
-              <div style="width:62px;flex:none;padding:8px 8px;text-align:right">Total</div>
-            </div>
-            <sc-for list="{{ monthMatrix }}" as="m" hint-placeholder-count="12">
-              <div style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);background:{{ m.rowBg }}">
-                <div onClick="{{ m.open }}" style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer">{{ m.abbr }}<sc-if value="{{ m.hasComment }}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:99px;background:var(--accent);flex:none"></span></sc-if><sc-if value="{{ m.isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;flex:none">🔒</span></sc-if></div>
-                <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
-                  <div style="flex:1;padding:4px 3px">
-                    <sc-if value="{{ c.isAuto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;padding:6px 3px;color:var(--accent)">{{ c.autoFmt }}</div></sc-if>
-                    <sc-if value="{{ !c.isAuto }}" hint-placeholder-val="{{ true }}"><input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:{{ c.color }}"/></sc-if>
-                  </div>
-                </sc-for>
-                <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:600">{{ m.totFmt }}</div>
-              </div>
-            </sc-for>
-            <div style="display:flex;font-family:var(--fnum);font-size:10px;border-top:2px solid var(--cb);background:var(--subtle)">
-              <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:700;font-size:10px">Gasto</div>
-              <sc-for list="{{ itemFooter }}" as="f" hint-placeholder-count="5"><div style="flex:1;padding:9px 4px;text-align:right;font-weight:600">{{ f.gastoFmt }}</div></sc-for>
-              <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:700">{{ gastoAnoTotFmt }}</div>
-            </div>
-            <div style="display:flex;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb)">
-              <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:10px;color:var(--muted)">Ppto</div>
-              <sc-for list="{{ itemFooter }}" as="f" hint-placeholder-count="5"><div style="flex:1;padding:3px 4px"><input value="{{ f.presupV }}" onFocus="{{ f.presupFocus }}" onInput="{{ f.presupInput }}" onBlur="{{ f.presupBlur }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:var(--muted)"/></div></sc-for>
-              <div style="width:62px;flex:none;padding:9px 8px;text-align:right;color:var(--muted)">{{ presupTotFmt }}</div>
-            </div>
-            <div style="display:flex;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb)">
-              <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:10px">Dif.</div>
-              <sc-for list="{{ itemFooter }}" as="f" hint-placeholder-count="5"><div style="flex:1;padding:9px 4px;text-align:right;font-weight:600;color:{{ f.difColor }}">{{ f.difFmt }}</div></sc-for>
-              <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:700;color:{{ difTotColor }}">{{ difTotFmt }}</div>
-            </div>
           </div>
         </div>
       </div>
@@ -2390,10 +2317,9 @@
         <div style="font-size:12px;color:var(--muted)">Balance de caja anual</div>
         <div style="font-family:var(--fnum);font-size:25px;font-weight:600;margin-top:3px;color:{{ balanceCajaColor }}">{{ balanceCajaAnualFmt }}</div>
         <div style="margin-top:13px;border-top:1px solid var(--cb);padding-top:11px;display:flex;flex-direction:column;gap:7px;font-size:12px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Σ Caja gasto (12 meses)</span><b style="font-family:var(--fnum)">{{ cajaGastoTotFmt }}</b></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">+ Ingresos extra</span><b style="font-family:var(--fnum);color:#3f8f63">{{ ingresoTotFmt }}</b></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">= Caja final anual</span><b style="font-family:var(--fnum);color:var(--accent)">{{ cajaFinalAnualFmt }}</b></div>
-          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--cb);padding-top:7px"><span style="color:var(--muted)">% cumplimiento proyectado</span><b style="font-family:var(--fnum);color:{{ pctCajaProyectado>=100?'#3f8f63':pctCajaProyectado>=80?'#c08a2e':'#b8472e' }}">{{ pctCajaProyectado }}%</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Presupuesto total anual</span><b style="font-family:var(--fnum)">{{ cajaPptoTotFmt }}</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Total gasto año</span><b style="font-family:var(--fnum)">{{ totalGastoAnhoFmt }}</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Caja con ingreso extra</span><b style="font-family:var(--fnum);color:var(--accent)">{{ cajaFinalAnualFmt }}</b></div>
         </div>
       </div>
       <div style="height:8px"></div>
@@ -3167,7 +3093,7 @@ class Component extends DCLogic {
       onInput:(e)=>{const t=e.target.value;this.setState({editing:{id,text:t}});this.setBudget(id,t);},
       onBlur:()=>this.setState({editing:{id:null,text:''}}), isEd};};
     const fixedList=this.fixed.map(f=>{const h=lineH(f.id);const b=this.budgetOf(f.id);return{name:f.name,value:h.isEd?S.editing.text:editVal(b),suffix:psuf,onFocus:h.onFocus,onInput:h.onInput,onBlur:h.onBlur};});
-    const recurringList=this.recurring.map(c=>{const rc=this._rc(c);const kA=c.id+'_amount',kI=c.id+'_interval';const edA=S.rcEditing.key===kA,edI=S.rcEditing.key===kI;return{name:rc.name,amount:edA?S.rcEditing.text:String(rc.amount),interval:edI?S.rcEditing.text:String(rc.interval),perFmt:this.fmt0(rc.amount),intervalLabel:'cada '+rc.interval+' meses',amortFmt:this.fmt0(rc.amount/rc.interval*pf)+psuf,nextDueLabel:this.nextDue({...c,...rc}),annualFmt:this.fmt0(rc.amount*c.due.length),onAmount:e=>{this.setRcEdit(kA,e.target.value);this.setRecurring(c.id,'amount',e.target.value);},onInterval:e=>{this.setRcEdit(kI,e.target.value);this.setRecurring(c.id,'interval',e.target.value);},onFocusAmount:e=>this.setRcEdit(kA,e.target.value),onFocusInterval:e=>this.setRcEdit(kI,e.target.value),onBlurAmount:()=>this.setState({rcEditing:{key:null,text:''}}),onBlurInterval:()=>this.setState({rcEditing:{key:null,text:''}})};});
+    const recurringList=this.recurring.map(c=>{const rc=this._rc(c);const kA=c.id+'_amount',kI=c.id+'_interval';const edA=S.rcEditing.key===kA,edI=S.rcEditing.key===kI;return{name:rc.name,amount:edA?S.rcEditing.text:String(rc.amount),interval:edI?S.rcEditing.text:String(rc.interval),perFmt:this.fmt0(rc.amount),intervalLabel:c.due.length+' cuota'+(c.due.length!==1?'s':'')+' /año',amortFmt:this.fmt0(rc.amount/rc.interval*pf)+psuf,nextDueLabel:this.nextDue({...c,...rc}),annualFmt:this.fmt0(rc.amount*c.due.length),onAmount:e=>{this.setRcEdit(kA,e.target.value);this.setRecurring(c.id,'amount',e.target.value);},onInterval:e=>{this.setRcEdit(kI,e.target.value);this.setRecurring(c.id,'interval',e.target.value);},onFocusAmount:e=>this.setRcEdit(kA,e.target.value),onFocusInterval:e=>this.setRcEdit(kI,e.target.value),onBlurAmount:()=>this.setState({rcEditing:{key:null,text:''}}),onBlurInterval:()=>this.setState({rcEditing:{key:null,text:''}})};});
     const variableList=this.variable.map(c=>{const h=lineH(c.id);const b=this.budgetOf(c.id);const a=this.catActual(c.id,this.curMonth);const p=b?a/b*100:0;return{name:c.name,color:c.color,value:h.isEd?S.editing.text:editVal(b),suffix:psuf,actualFmt:this.fmt0(a*pf)+' gastado',barWidth:Math.min(100,p),barColor:this.sHex(p),onFocus:h.onFocus,onInput:h.onInput,onBlur:h.onBlur};});
     const variableActual=this.variable.reduce((s,c)=>s+this.catActual(c.id,this.curMonth),0);
     const mbp=this.monthBudget;
@@ -3360,10 +3286,10 @@ class Component extends DCLogic {
     const cajaPptoTot=sumA(cj.ppto), ingresoTot=sumA(cj.ingreso);
     const fixedAnual=this.fixedTotal*12;
     const variableAnual=this.variableBudgetTotal*12;
-    const totalGastoAnho=cajaGastoTot-fixedAnual-variableAnual;
+    const totalGastoAnho=fixedAnual+variableAnual-cajaPptoTot;
     const annualBudgetPresup=this.monthBudget*12;
     const complianceGasto=annualBudgetPresup>0?Math.round(Math.abs(totalGastoAnho)/annualBudgetPresup*100):0;
-    const totalConIngreso=totalGastoAnho+ingresoTot;
+    const totalConIngreso=totalGastoAnho-ingresoTot;
     const complianceConIngreso=annualBudgetPresup>0?Math.round(Math.abs(totalConIngreso)/annualBudgetPresup*100):0;
     const pctNon=cj.pct.filter(x=>x); const pctAnual=pctNon.length?Math.round(sumA(pctNon)/pctNon.length):0;
     const balanceCajaAnual=cajaFinalAnualTot;
@@ -3507,10 +3433,10 @@ class Component extends DCLogic {
       difTotFmt:(difTot<0?'−':'+')+this.fmt0(Math.abs(difTot)), difTotColor:difTot<0?'#b8472e':'#3f8f63',
       difMesFmt:(difMes<0?'−':'+')+this.fmt0(Math.abs(difMes)), difMesColor:difMes<0?'#b8472e':'#3f8f63',
       cajaRows, cajaPptoTotFmt:this.fmt0(cajaPptoTot), cajaGastoTotFmt:this.fmt0(cajaGastoTot), cajaFinalAnualFmt:this.fmt0(cajaFinalAnualTot), ingresoTotFmt:this.fmt0(ingresoTot), pctAnual, pctCajaProyectado,
-      totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:totalGastoAnho>=0?'#3f8f63':'#b8472e',
-      totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:totalConIngreso>=0?'#3f8f63':'#b8472e',
+      totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
+      totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.3',
+      appVersion:'v2.4',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
