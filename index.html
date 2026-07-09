@@ -1741,9 +1741,9 @@
           </sc-for>
         </div>
         <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px">
-          <button onClick="{{ dayNavPrev }}" style="width:26px;height:26px;border-radius:7px;border:1px solid var(--cb);background:var(--card);color:{{ dayNavCanPrev ? 'var(--ink)' : 'var(--subtle)' }};font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">‹</button>
+          <button onClick="{{ dayNavPrev }}" style="width:26px;height:26px;border-radius:7px;border:1px solid var(--cb);background:var(--card);color:{{ dayNavPrevColor }};font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">‹</button>
           <span style="font-size:11px;color:var(--muted);min-width:60px;text-align:center">{{ selDayLabel }}</span>
-          <button onClick="{{ dayNavNext }}" style="width:26px;height:26px;border-radius:7px;border:1px solid var(--cb);background:var(--card);color:{{ dayNavCanNext ? 'var(--ink)' : 'var(--subtle)' }};font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">›</button>
+          <button onClick="{{ dayNavNext }}" style="width:26px;height:26px;border-radius:7px;border:1px solid var(--cb);background:var(--card);color:{{ dayNavNextColor }};font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">›</button>
         </div>
         <sc-if value="{{ showSelDay }}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--subtle);border-radius:10px;padding:8px 10px;margin-top:6px">
@@ -3275,9 +3275,11 @@ class Component extends DCLogic {
     const dayMax=Math.max.apply(null,perDay.slice(1).concat(1));
     const selD=S.selectedDay||null;
     const dailyBars=[]; for(let d=1;d<=dim;d++){const fut=d>tday;const isSel=selD===d;dailyBars.push({h:Math.max(2,Math.round(perDay[d]/dayMax*56)),barColor:fut?'var(--subtle)':isSel?'#f97316':(d===tday?'#2f6bd8':'#a9c8f5'),label:(d===1||d===8||d===15||d===22||d===dim||d===tday)?String(d):'',labelColor:isSel?'#f97316':d===tday?'var(--accent)':'var(--muted)',labelWeight:isSel||d===tday?'700':'500',pick:()=>this.setState({selectedDay:selD===d?null:d})});}
-    const dayNavPrev=selD&&selD>1?()=>this.setState({selectedDay:selD-1}):null;
-    const dayNavNext=selD&&selD<dim?()=>this.setState({selectedDay:selD+1}):null;
     const dayNavCanPrev=!!(selD&&selD>1), dayNavCanNext=!!(selD&&selD<dim);
+    const dayNavPrev=()=>{if(dayNavCanPrev)this.setState({selectedDay:selD-1});};
+    const dayNavNext=()=>{if(dayNavCanNext)this.setState({selectedDay:selD+1});};
+    const dayNavPrevColor=dayNavCanPrev?'var(--ink)':'var(--cb)';
+    const dayNavNextColor=dayNavCanNext?'var(--ink)':'var(--cb)';
     const spentSoFar=perDay.slice(1,tday+1).reduce((s,v)=>s+v,0);
     const diaProm=tday?spentSoFar/tday:0; const hoy=perDay[tday]||0;
     const semana=perDay.slice(Math.max(1,tday-6),tday+1).reduce((s,v)=>s+v,0);
@@ -3422,7 +3424,7 @@ class Component extends DCLogic {
       dayNum:this.dayNum, dayRingDash:(dayRC*dayFrac).toFixed(1)+' '+dayRC.toFixed(1),
       dailyBars, diaPromFmt:this.fmt0(diaProm), hoyFmt:this.fmt0(hoy), semanaFmt:this.fmt0(semana), catRows,
       selDayRows, selDayTotFmt, selDayLabel, showSelDay,
-      dayNavPrev, dayNavNext, dayNavCanPrev, dayNavCanNext,
+      dayNavPrev, dayNavNext, dayNavCanPrev, dayNavCanNext, dayNavPrevColor, dayNavNextColor,
       goVerTodo:()=>this.setTab('diario'),
       rootRef:this.rootRef,
       isInicio:S.tab==='inicio', isDiario:S.tab==='diario', isPresup:S.tab==='presupuesto', isAnual:S.tab==='anual', isBanco:S.tab==='banco',
@@ -3507,7 +3509,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v3.2',
+      appVersion:'v3.3',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
