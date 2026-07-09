@@ -1788,7 +1788,10 @@
             <div style="font-size:10px;color:var(--muted);line-height:1.2">cumpl.</div>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">{{ chartDayLabel }}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:10px;color:var(--muted)">{{ chartDayLabel }}</span>
+          <span style="font-size:10px;color:var(--accent);font-weight:500">{{ chartModeLabel }}</span>
+        </div>
         <div style="position:relative">
           <svg viewBox="0 0 320 162" style="width:100%;height:auto;display:block;overflow:visible">
             <line x1="52" y1="12" x2="52" y2="140" stroke="#c8c3bb" stroke-width="1"/>
@@ -1796,6 +1799,7 @@
             <line x1="52" y1="76" x2="312" y2="76" stroke="#e5e0d8" stroke-width="0.7"/>
             <line x1="52" y1="44" x2="312" y2="44" stroke="#e5e0d8" stroke-width="0.7"/>
             <line x1="52" y1="12" x2="312" y2="12" stroke="#e5e0d8" stroke-width="0.7"/>
+            <line x1="52" y1="{{ chartPlanEndY }}" x2="312" y2="{{ chartPlanEndY }}" stroke="#3a5fcd" stroke-width="1" stroke-dasharray="4 3" opacity="0.45"/>
             <path d="{{ chartRealArea }}" fill="rgba(122,160,232,.20)"/>
             <polyline points="{{ chartPlanPts }}" fill="none" stroke="#3a5fcd" stroke-width="2" stroke-linecap="round"/>
             <polyline points="{{ chartRealPts }}" fill="none" stroke="#5b82da" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1803,18 +1807,21 @@
             <line x1="{{ chartTodayX }}" y1="12" x2="{{ chartTodayX }}" y2="140" stroke="var(--cb)" stroke-width="1"/>
             <circle cx="{{ chartRealDotX }}" cy="{{ chartRealDotY }}" r="3.6" fill="#2f6bd8" stroke="#fff" stroke-width="1.5"/>
             <circle cx="{{ chartProjDotX }}" cy="{{ chartProjDotY }}" r="3.6" fill="{{ chartProjColor }}" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="312" cy="{{ chartPlanEndY }}" r="3" fill="#3a5fcd" stroke="#fff" stroke-width="1.5"/>
             <text x="{{ chartXL1 }}" y="153" fill="#8c877c" font-size="9" text-anchor="middle">1</text>
             <text x="{{ chartXL8 }}" y="153" fill="#8c877c" font-size="9" text-anchor="middle">8</text>
             <text x="{{ chartXL15 }}" y="153" fill="#8c877c" font-size="9" text-anchor="middle">15</text>
             <text x="{{ chartXL22 }}" y="153" fill="#8c877c" font-size="9" text-anchor="middle">22</text>
-            <text x="{{ chartXLLast }}" y="153" fill="#8c877c" font-size="9" text-anchor="middle">31</text>
           </svg>
           <div style="position:absolute;top:0;left:0;width:50px;height:100%;pointer-events:none">
-            <span style="position:absolute;right:4px;top:7%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL4 }}</span>
-            <span style="position:absolute;right:4px;top:27%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL3 }}</span>
-            <span style="position:absolute;right:4px;top:47%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL2 }}</span>
-            <span style="position:absolute;right:4px;top:67%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL1 }}</span>
-            <span style="position:absolute;right:4px;top:86%;font-size:9px;color:#888;transform:translateY(-50%)">0</span>
+            <span style="position:absolute;right:3px;top:7.4%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL4 }}</span>
+            <span style="position:absolute;right:3px;top:27.2%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL3 }}</span>
+            <span style="position:absolute;right:3px;top:46.9%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL2 }}</span>
+            <span style="position:absolute;right:3px;top:66.7%;font-size:9px;color:#888;transform:translateY(-50%)">{{ chartYL1 }}</span>
+            <span style="position:absolute;right:3px;top:86.4%;font-size:9px;color:#888;transform:translateY(-50%)">0</span>
+          </div>
+          <div style="position:absolute;top:0;right:0;width:56px;height:100%;pointer-events:none">
+            <span style="position:absolute;left:4px;top:{{ chartPlanEndYPct }};font-size:8.5px;color:#3a5fcd;font-weight:600;transform:translateY(-50%);white-space:nowrap;background:var(--card);padding:1px 2px;border-radius:3px">{{ planEndFmt }}</span>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:10.5px;color:var(--muted);flex-wrap:wrap">
@@ -3230,11 +3237,14 @@ class Component extends DCLogic {
     const yMax=(Math.max(planEnd,projEnd,realToday)*1.08)||1;
     const padL=52, padR=8, plotTop=12, plotBot=140, SVGW=320;
     const plotW=SVGW-padL-padR;
-    const fmtK=v=>{if(v>=1000000)return Math.round(v/100000)/10+'M';if(v>=1000)return Math.round(v/1000)+'k';return String(Math.round(v));};
+    const fmtK=v=>{if(v>=1000000)return (v/1000000).toFixed(1)+'M';if(v>=1000)return (v/1000).toFixed(1)+'k';return String(Math.round(v));};
     const xF=d=>padL+(d-1)/(dim-1)*plotW;
     const yF=v=>plotBot-(v/yMax)*(plotBot-plotTop);
     const chartYL1=fmtK(yMax*0.25),chartYL2=fmtK(yMax*0.5),chartYL3=fmtK(yMax*0.75),chartYL4=fmtK(yMax);
     const chartXL1=xF(1).toFixed(1),chartXL8=xF(8).toFixed(1),chartXL15=xF(15).toFixed(1),chartXL22=xF(22).toFixed(1),chartXLLast=xF(dim).toFixed(1),chartXLabelLast=String(dim);
+    const chartPlanEndY=yF(planEnd).toFixed(1);
+    const chartPlanEndYPct=(yF(planEnd)/162*100).toFixed(1)+'%';
+    const chartModeLabel=showFixed?'Variable + Fijo':'Solo variable';
     const planY1=showFixed?this.fixedTotal:tracked/dim;
     const planPts=xF(1).toFixed(1)+','+yF(planY1).toFixed(1)+' '+xF(dim).toFixed(1)+','+yF(planEnd).toFixed(1);
     const realPts=realCum.map(p=>xF(p.d).toFixed(1)+','+yF(p.v).toFixed(1)).join(' ');
@@ -3458,7 +3468,7 @@ class Component extends DCLogic {
       chartMetaY:yF(tracked).toFixed(1), chartTodayX:xF(tday).toFixed(1), chartPlotBot:plotBot,
       chartYL1,chartYL2,chartYL3,chartYL4,
       chartXL1,chartXL8,chartXL15,chartXL22,chartXLLast,chartXLabelLast,
-      chartProjLabelY:Math.max(10,yF(projEnd)-12).toFixed(1),
+      chartPlanEndY, chartPlanEndYPct, chartModeLabel,
       chartProjColor:projOver?'#b8472e':'#3f8f63', projEndChartFmt:this.fmt0(projEnd), planEndFmt:this.fmt0(planEnd), chartMetaFmt:this.fmt0(tracked),
       cumpl, cumplHex, cumplMsg,
       chartRealDotX:xF(tday).toFixed(1), chartRealDotY:yF(realToday).toFixed(1), chartProjDotX:xF(dim).toFixed(1), chartProjDotY:yF(projEnd).toFixed(1),
@@ -3522,7 +3532,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v4.1',
+      appVersion:'v4.2',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
