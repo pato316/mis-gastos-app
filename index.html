@@ -1790,12 +1790,11 @@
           </div>
         </div>
         <svg viewBox="0 0 320 162" style="width:100%;height:auto;display:block;overflow:visible">
+          <line x1="{{ chartPadL }}" y1="12" x2="{{ chartPadL }}" y2="140" stroke="#c8c3bb" stroke-width="1"/>
           <sc-for list="{{ chartYTicks }}" as="yt" hint-placeholder-count="5">
             <line x1="{{ chartPadL }}" y1="{{ yt.y }}" x2="312" y2="{{ yt.y }}" stroke="#e5e0d8" stroke-width="0.7"/>
-            <line x1="{{ chartAxisX }}" y1="{{ yt.y }}" x2="{{ chartPadL }}" y2="{{ yt.y }}" stroke="#a09890" stroke-width="0.7"/>
             <text x="{{ chartLabelX }}" y="{{ yt.y }}" fill="#7a7570" font-size="8.5" text-anchor="end" dominant-baseline="middle">{{ yt.label }}</text>
           </sc-for>
-          <line x1="{{ chartPadL }}" y1="12" x2="{{ chartPadL }}" y2="140" stroke="#c8c3bb" stroke-width="1"/>
           <path d="{{ chartRealArea }}" fill="rgba(122,160,232,.20)"/>
           <polyline points="{{ chartPlanPts }}" fill="none" stroke="#3a5fcd" stroke-width="2" stroke-linecap="round"/>
           <polyline points="{{ chartRealPts }}" fill="none" stroke="#5b82da" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -3511,7 +3510,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v3.6',
+      appVersion:'v3.7',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
