@@ -3216,7 +3216,7 @@ class Component extends DCLogic {
     let cum=0; const realCum=[]; for(let d=1;d<=tday;d++){cum+=dayTotals[d]; realCum.push({d,v:cum});}
     const realToday=cum; const burn=tday?realToday/tday:0;
     const projEnd=realToday+burn*(dim-tday); const planEnd=tracked;
-    const yMax=(Math.max(trackedFull,projEnd,realToday)*1.15)||1;
+    const yMax=(Math.max(planEnd,projEnd,realToday)*1.15)||1;
     const padL=46, padR=8, plotTop=12, plotBot=140, SVGW=320;
     const plotW=SVGW-padL-padR;
     const fmtK=v=>v>=1000?'$'+Math.round(v/100)/10+'k':'$'+Math.round(v);
@@ -3509,7 +3509,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v3.4',
+      appVersion:'v3.5',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
