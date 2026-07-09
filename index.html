@@ -1778,17 +1778,17 @@
 
       <!-- proyeccion chart -->
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:16px 16px 12px;margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-          <div style="display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0">
-            <div style="font-size:11px;font-weight:600;white-space:nowrap">Proyección del mes</div>
-            <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;border:1.5px solid {{ chartFixedBtnBd }};background:{{ chartFixedBtnBg }};color:{{ chartFixedBtnFg }};cursor:pointer;min-width:52px;max-width:52px;white-space:nowrap;flex:none">{{ chartFixedBtnLabel }}</button>
-            <div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ chartDayLabel }}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:12px;font-weight:600">Proyección del mes</div>
+            <button onClick="{{ toggleChartFixed }}" style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;border:1.5px solid {{ chartFixedBtnBd }};background:{{ chartFixedBtnBg }};color:{{ chartFixedBtnFg }};cursor:pointer;white-space:nowrap;flex:none">{{ chartFixedBtnLabel }}</button>
           </div>
-          <div style="text-align:right;display:flex;align-items:baseline;gap:5px">
-            <div style="font-family:var(--fnum);font-size:24px;font-weight:700;color:{{ cumplHex }};line-height:1">{{ cumpl }}%</div>
-            <div style="font-size:10px;color:var(--muted);max-width:74px;text-align:left;line-height:1.2">cumplimiento<br>del plan</div>
+          <div style="text-align:right;display:flex;align-items:baseline;gap:4px">
+            <div style="font-family:var(--fnum);font-size:22px;font-weight:700;color:{{ cumplHex }};line-height:1">{{ cumpl }}%</div>
+            <div style="font-size:10px;color:var(--muted);line-height:1.2">cumpl.</div>
           </div>
         </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">{{ chartDayLabel }}</div>
         <svg viewBox="0 0 320 162" style="width:100%;height:auto;display:block;overflow:visible">
           <line x1="52" y1="12" x2="52" y2="140" stroke="#c8c3bb" stroke-width="1"/>
           <sc-for list="{{ chartYTicks }}" as="yt" hint-placeholder-count="5">
@@ -3220,8 +3220,8 @@ class Component extends DCLogic {
     const yMax=(Math.max(planEnd,projEnd,realToday)*1.08)||1;
     const padL=52, padR=8, plotTop=12, plotBot=140, SVGW=320;
     const plotW=SVGW-padL-padR;
-    const fmtK=v=>{if(v>=1000000)return'$'+Math.round(v/100000)/10+'M';if(v>=1000)return'$'+Math.round(v/1000)+'k';return'$'+Math.round(v);};
-    const chartYTicks=[0,0.25,0.5,0.75,1].map(f=>({y:(plotBot-(f*(plotBot-plotTop))).toFixed(1),label:f===0?'$0':fmtK(yMax*f)}));
+    const fmtK=v=>{if(v>=1000000)return Math.round(v/100000)/10+'M';if(v>=1000)return Math.round(v/1000)+'k';return String(Math.round(v));};
+    const chartYTicks=[0,0.25,0.5,0.75,1].map(f=>({y:(plotBot-(f*(plotBot-plotTop))).toFixed(1),label:f===0?'0':fmtK(yMax*f)}));
     const xF=d=>padL+(d-1)/(dim-1)*plotW;
     const yF=v=>plotBot-(v/yMax)*(plotBot-plotTop);
     const planY1=showFixed?this.fixedTotal:tracked/dim;
@@ -3510,7 +3510,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v3.8',
+      appVersion:'v3.9',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
