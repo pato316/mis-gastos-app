@@ -2276,6 +2276,50 @@
         <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:9px;text-align:center">{{ importMsg }}</div>
       </sc-if>
 
+      <!-- control por item -->
+      <div style="font-size:15px;font-weight:600;margin:22px 4px 4px">Control por ítem</div>
+      <div style="font-size:11.5px;color:var(--muted);margin:0 4px 12px">Gastos grandes o fuera de lo común, mes a mes vs presupuesto.</div>
+      <div style="background:var(--card);border:1px solid var(--cb);border-radius:14px;overflow:hidden;margin-bottom:12px">
+        <div style="overflow-x:auto">
+          <div style="min-width:432px">
+            <div style="display:flex;background:var(--subtle);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--muted)">
+              <div style="width:52px;flex:none;padding:8px 8px">Mes</div>
+              <sc-for list="{{ itemHeader }}" as="h" hint-placeholder-count="5">
+                <div style="flex:1;padding:8px 4px;text-align:right;color:{{ h.color }}">{{ h.short }}</div>
+              </sc-for>
+              <div style="width:62px;flex:none;padding:8px 8px;text-align:right">Total</div>
+            </div>
+            <sc-for list="{{ monthMatrix }}" as="m" hint-placeholder-count="12">
+              <div style="display:flex;align-items:center;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb);background:{{ m.rowBg }}">
+                <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:11px">{{ m.abbr }}</div>
+                <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
+                  <div style="flex:1;padding:4px 3px">
+                    <sc-if value="{{ c.isAuto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;padding:6px 3px;color:var(--accent)">{{ c.autoFmt }}</div></sc-if>
+                    <sc-if value="{{ !c.isAuto }}" hint-placeholder-val="{{ true }}"><input value="{{ c.val }}" onFocus="{{ c.onFocus }}" onInput="{{ c.onInput }}" onBlur="{{ c.onBlur }}" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;font-weight:600;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:{{ c.color }}"/></sc-if>
+                  </div>
+                </sc-for>
+                <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:600">{{ m.totFmt }}</div>
+              </div>
+            </sc-for>
+            <div style="display:flex;font-family:var(--fnum);font-size:10px;border-top:2px solid var(--cb);background:var(--subtle)">
+              <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:700;font-size:10px">Gasto</div>
+              <sc-for list="{{ itemFooter }}" as="f" hint-placeholder-count="5"><div style="flex:1;padding:9px 4px;text-align:right;font-weight:600">{{ f.gastoFmt }}</div></sc-for>
+              <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:700">{{ gastoAnoTotFmt }}</div>
+            </div>
+            <div style="display:flex;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb)">
+              <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:10px;color:var(--muted)">Ppto</div>
+              <sc-for list="{{ itemFooter }}" as="f" hint-placeholder-count="5"><div style="flex:1;padding:3px 4px"><input value="{{ f.presupV }}" onFocus="{{ f.presupFocus }}" onInput="{{ f.presupInput }}" onBlur="{{ f.presupBlur }}" inputmode="numeric" style="width:100%;text-align:right;font-family:var(--fnum);font-size:10px;background:var(--subtle);border:none;border-radius:6px;padding:6px 3px;color:var(--muted)"/></div></sc-for>
+              <div style="width:62px;flex:none;padding:9px 8px;text-align:right;color:var(--muted)">{{ presupTotFmt }}</div>
+            </div>
+            <div style="display:flex;font-family:var(--fnum);font-size:10px;border-top:1px solid var(--cb)">
+              <div style="width:52px;flex:none;padding:9px 8px;font-family:var(--fui);font-weight:600;font-size:10px">Dif.</div>
+              <sc-for list="{{ itemFooter }}" as="f" hint-placeholder-count="5"><div style="flex:1;padding:9px 4px;text-align:right;font-weight:600;color:{{ f.difColor }}">{{ f.difFmt }}</div></sc-for>
+              <div style="width:62px;flex:none;padding:9px 8px;text-align:right;font-weight:700;color:{{ difTotColor }}">{{ difTotFmt }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- mes a mes -->
       <div style="font-size:15px;font-weight:600;margin:22px 4px 12px">Mes a mes</div>
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:16px;padding:18px 12px 12px">
@@ -3532,7 +3576,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v4.2',
+      appVersion:'v4.3',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
