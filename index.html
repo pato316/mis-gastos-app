@@ -1726,9 +1726,13 @@
 
       <!-- daily bars -->
       <div style="background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:16px 16px 12px;margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="font-size:14px;font-weight:600">Gasto por día</div>
-          <div style="font-size:11px;color:var(--muted)">{{ chartDayLabel }}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:600">Gasto por día</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button onClick="{{ dayBarPrev }}" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--cb);background:var(--card);color:{{ dayBarCanPrev ? 'var(--ink)' : 'var(--muted)' }};font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">‹</button>
+            <span style="font-size:10px;color:var(--muted);min-width:36px;text-align:center">{{ dayBarRange }}</span>
+            <button onClick="{{ dayBarNext }}" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--cb);background:var(--card);color:{{ dayBarCanNext ? 'var(--ink)' : 'var(--muted)' }};font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">›</button>
+          </div>
         </div>
         <div style="display:flex;align-items:flex-end;gap:2px;height:60px">
           <sc-for list="{{ dailyBars }}" as="b" hint-placeholder-count="30">
@@ -1815,7 +1819,7 @@
       <!-- en que gastas -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 4px 12px">
         <div style="font-size:15px;font-weight:600">En qué gastas</div>
-        <button onClick="{{ goPresup }}" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">Ver todo</button>
+        <button onClick="{{ goVerTodo }}" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">Ver todo</button>
       </div>
       <sc-for list="{{ catRows }}" as="c" hint-placeholder-count="5">
         <div style="display:flex;align-items:center;gap:12px;padding:9px 2px">
@@ -2673,6 +2677,7 @@ class Component extends DCLogic {
       chartShowFixed: false,
       selectedMonthBar: null,
       selectedDay: null,
+      dayBarOffset: 0,
       expenses: ex,
     };
     // load persisted state — sanitise to prevent null arrays crashing renderVals
@@ -3268,7 +3273,14 @@ class Component extends DCLogic {
     md.exps.forEach(e=>{const d=parseInt(e.date.slice(8),10); if(d>=1&&d<=dim)perDay[d]+=e.amount;});
     const dayMax=Math.max.apply(null,perDay.slice(1).concat(1));
     const selD=S.selectedDay;
-    const dailyBars=[]; for(let d=1;d<=dim;d++){const fut=d>tday;const isSel=selD===d;dailyBars.push({h:Math.max(2,Math.round(perDay[d]/dayMax*56)),barColor:fut?'var(--subtle)':isSel?'#2f6bd8':(d===tday?'#2f6bd8':'#a9c8f5'),label:(d===1||d===8||d===15||d===22||d===dim||d===tday||isSel)?String(d):'',labelColor:isSel||d===tday?'var(--accent)':'var(--muted)',labelWeight:isSel||d===tday?'700':'500',pick:()=>this.setState({selectedDay:selD===d?null:d})});}
+    const WIN=15;
+    const dbo=Math.min(Math.max(0,S.dayBarOffset||0),Math.max(0,dim-WIN));
+    const allBars=[]; for(let d=1;d<=dim;d++){const fut=d>tday;const isSel=selD===d;allBars.push({h:Math.max(2,Math.round(perDay[d]/dayMax*56)),barColor:fut?'var(--subtle)':isSel?'#2f6bd8':(d===tday?'#2f6bd8':'#a9c8f5'),label:isSel?String(d):(d===dbo+1||d===dbo+WIN||d===tday||d===1||d===dim)?String(d):'',labelColor:isSel||d===tday?'var(--accent)':'var(--muted)',labelWeight:isSel||d===tday?'700':'500',pick:()=>this.setState({selectedDay:selD===d?null:d})});}
+    const dailyBars=allBars.slice(dbo,dbo+WIN);
+    const dayBarCanPrev=dbo>0, dayBarCanNext=dbo+WIN<dim;
+    const dayBarPrev=()=>this.setState({dayBarOffset:Math.max(0,dbo-7),selectedDay:null});
+    const dayBarNext=()=>this.setState({dayBarOffset:Math.min(dim-WIN,dbo+7),selectedDay:null});
+    const dayBarRange=(dbo+1)+'–'+(Math.min(dbo+WIN,dim));
     const spentSoFar=perDay.slice(1,tday+1).reduce((s,v)=>s+v,0);
     const diaProm=tday?spentSoFar/tday:0; const hoy=perDay[tday]||0;
     const semana=perDay.slice(Math.max(1,tday-6),tday+1).reduce((s,v)=>s+v,0);
@@ -3413,6 +3425,8 @@ class Component extends DCLogic {
       dayNum:this.dayNum, dayRingDash:(dayRC*dayFrac).toFixed(1)+' '+dayRC.toFixed(1),
       dailyBars, diaPromFmt:this.fmt0(diaProm), hoyFmt:this.fmt0(hoy), semanaFmt:this.fmt0(semana), catRows,
       selDayRows, selDayTotFmt, selDayLabel, showSelDay,
+      dayBarPrev, dayBarNext, dayBarCanPrev, dayBarCanNext, dayBarRange,
+      goVerTodo:()=>this.setTab('presupuesto'),
       rootRef:this.rootRef,
       isInicio:S.tab==='inicio', isDiario:S.tab==='diario', isPresup:S.tab==='presupuesto', isAnual:S.tab==='anual', isBanco:S.tab==='banco',
       topKicker: ({inicio:'Mi presupuesto',diario:'Registro',presupuesto:'Plan mensual',banco:'Conciliación',anual:String(this.year)})[S.tab],
@@ -3496,7 +3510,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v3.0',
+      appVersion:'v3.1',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
