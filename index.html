@@ -1732,14 +1732,29 @@
         </div>
         <div style="display:flex;align-items:flex-end;gap:2px;height:60px">
           <sc-for list="{{ dailyBars }}" as="b" hint-placeholder-count="30">
-            <div style="flex:1;border-radius:2px 2px 0 0;height:{{ b.h }}px;background:{{ b.barColor }}"></div>
+            <div onClick="{{ b.pick }}" style="flex:1;border-radius:2px 2px 0 0;height:{{ b.h }}px;background:{{ b.barColor }};cursor:pointer"></div>
           </sc-for>
         </div>
         <div style="display:flex;gap:2px;margin-top:3px">
           <sc-for list="{{ dailyBars }}" as="b" hint-placeholder-count="30">
-            <div style="flex:1;text-align:center;font-size:7px;font-weight:{{ b.labelWeight }};color:{{ b.labelColor }}">{{ b.label }}</div>
+            <div onClick="{{ b.pick }}" style="flex:1;text-align:center;font-size:7px;font-weight:{{ b.labelWeight }};color:{{ b.labelColor }};cursor:pointer">{{ b.label }}</div>
           </sc-for>
         </div>
+        <sc-if value="{{ showSelDay }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--subtle);border-radius:10px;padding:8px 10px;margin-top:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:600">{{ selDayLabel }}</span>
+              <span style="font-family:var(--fnum);font-size:11px;font-weight:700">{{ selDayTotFmt }}</span>
+            </div>
+            <sc-for list="{{ selDayRows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:7px;padding:2px 0;font-size:10.5px">
+                <div style="width:7px;height:7px;border-radius:99px;background:{{ r.color }};flex:none"></div>
+                <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                <span style="font-family:var(--fnum);font-weight:600">{{ r.amtFmt }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
         <div style="display:flex;margin-top:14px;border-top:1px solid var(--cb);padding-top:12px">
           <div style="flex:1;text-align:center;border-right:1px solid var(--cb)">
             <div style="font-family:var(--fnum);font-size:14px;font-weight:600">{{ diaPromFmt }}</div>
@@ -1833,11 +1848,11 @@
         </svg>
         <div style="flex:1;display:flex;flex-direction:column;gap:5px">
           <sc-for list="{{ catRows }}" as="c" hint-placeholder-count="5">
-            <div style="display:flex;align-items:center;gap:7px;font-size:11px">
-              <div style="width:8px;height:8px;border-radius:99px;background:{{ c.color }};flex:none"></div>
-              <span style="flex:1;color:var(--ink);font-weight:500">{{ c.name }}</span>
-              <span style="font-family:var(--fnum);font-weight:600">{{ c.amountFmt }}</span>
-              <span style="color:var(--muted);width:26px;text-align:right">{{ c.pct }}%</span>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+              <div style="width:7px;height:7px;border-radius:99px;background:{{ c.color }};flex:none"></div>
+              <span style="flex:1;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ c.name }}</span>
+              <span style="font-family:var(--fnum);font-weight:600;white-space:nowrap">{{ c.amountFmt }}</span>
+              <span style="color:var(--muted);width:24px;text-align:right;flex:none">{{ c.pct }}%</span>
             </div>
           </sc-for>
         </div>
@@ -2258,9 +2273,17 @@
       </div>
       <div style="display:flex;gap:14px;margin:10px 4px 0;font-size:11px;color:var(--muted)">
         <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#3f8f63"></span>Bajo presup.</span>
-        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#c08a2e"></span>Ajustado</span>
         <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#b8472e"></span>Excedido</span>
       </div>
+      <sc-if value="{{ showMonthDetail }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--subtle);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:11.5px">
+          <div style="font-weight:600;margin-bottom:7px;font-size:12px">{{ selMonthDetail.abbr }} — desglose</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">Gastos fijos</span><b style="font-family:var(--fnum)">{{ selMonthDetail.fijo }}</b></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">Gastos variables</span><b style="font-family:var(--fnum)">{{ selMonthDetail.variable }}</b></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid var(--cb)"><span style="color:var(--muted)">Recurrentes</span><b style="font-family:var(--fnum)">{{ selMonthDetail.recurrente }}</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Caja ppto</span><b style="font-family:var(--fnum)">{{ selMonthDetail.cajaPpto }}</b></div>
+        </div>
+      </sc-if>
 
       <div style="background:var(--subtle);border-radius:16px;padding:15px 18px;margin-top:16px">
         <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:10px">Forecast vs presupuesto anual</div>
@@ -2649,6 +2672,7 @@ class Component extends DCLogic {
       settingsMsg: '',
       chartShowFixed: false,
       selectedMonthBar: null,
+      selectedDay: null,
       expenses: ex,
     };
     // load persisted state — sanitise to prevent null arrays crashing renderVals
@@ -3132,6 +3156,16 @@ class Component extends DCLogic {
     const ytdPct=Math.round(ytdA/ytdBudget*100);
     const projected=ytdA+this.monthBudget*(11-this.curMonth);
     const annualBudget=this.monthBudget*12;
+    const selMiDetail=S.selectedMonthBar;
+    const selMonthDetail=selMiDetail!=null?{
+      mi:selMiDetail,abbr:this.monthAbbr[selMiDetail],
+      fijo:this.fmt0(this.fixedTotal),
+      variable:this.fmt0(this.variableBudgetTotal),
+      recurrente:this.fmt0(this.recurring.filter(r=>r.due.includes(selMiDetail)).reduce((s,r)=>s+r.amount,0)),
+      cajaPpto:this.fmt0(cjPpto[selMiDetail]||0),
+      pctVal:cjPct[selMiDetail]||0,
+    }:null;
+    const showMonthDetail=selMiDetail!=null;
     const recurringTimeline=this.recurring.map(c=>{const rc=this._rc(c);return{name:rc.name,annualFmt:this.fmt0(rc.amount*c.due.length),cells:Array.from({length:12},(_,m)=>({bg:c.due.includes(m)?'#b58a2e':'var(--subtle)'}))};});
 
     // add sheet groups
@@ -3180,7 +3214,7 @@ class Component extends DCLogic {
     const padL=46, padR=8, plotTop=12, plotBot=140, SVGW=320;
     const plotW=SVGW-padL-padR;
     const fmtK=v=>v>=1000?'$'+Math.round(v/100)/10+'k':'$'+Math.round(v);
-    const chartYTicks=[0,0.33,0.66,1].map(f=>({y:(plotBot-(f*(plotBot-plotTop))).toFixed(1),label:fmtK(yMax*f)}));
+    const chartYTicks=[0.25,0.5,0.75,1].map(f=>({y:(plotBot-(f*(plotBot-plotTop))).toFixed(1),label:fmtK(yMax*f)}));
     const xF=d=>padL+(d-1)/(dim-1)*plotW;
     const yF=v=>plotBot-(v/yMax)*(plotBot-plotTop);
     const planY1=showFixed?this.fixedTotal:tracked/dim;
@@ -3233,7 +3267,8 @@ class Component extends DCLogic {
     const perDay=Array(dim+1).fill(0);
     md.exps.forEach(e=>{const d=parseInt(e.date.slice(8),10); if(d>=1&&d<=dim)perDay[d]+=e.amount;});
     const dayMax=Math.max.apply(null,perDay.slice(1).concat(1));
-    const dailyBars=[]; for(let d=1;d<=dim;d++){const fut=d>tday;dailyBars.push({h:Math.max(2,Math.round(perDay[d]/dayMax*56)),barColor:fut?'var(--subtle)':(d===tday?'#2f6bd8':'#a9c8f5'),label:(d===1||d===8||d===15||d===22||d===dim||d===tday)?String(d):'',labelColor:d===tday?'var(--accent)':'var(--muted)',labelWeight:d===tday?'700':'500'});}
+    const selD=S.selectedDay;
+    const dailyBars=[]; for(let d=1;d<=dim;d++){const fut=d>tday;const isSel=selD===d;dailyBars.push({h:Math.max(2,Math.round(perDay[d]/dayMax*56)),barColor:fut?'var(--subtle)':isSel?'#2f6bd8':(d===tday?'#2f6bd8':'#a9c8f5'),label:(d===1||d===8||d===15||d===22||d===dim||d===tday||isSel)?String(d):'',labelColor:isSel||d===tday?'var(--accent)':'var(--muted)',labelWeight:isSel||d===tday?'700':'500',pick:()=>this.setState({selectedDay:selD===d?null:d})});}
     const spentSoFar=perDay.slice(1,tday+1).reduce((s,v)=>s+v,0);
     const diaProm=tday?spentSoFar/tday:0; const hoy=perDay[tday]||0;
     const semana=perDay.slice(Math.max(1,tday-6),tday+1).reduce((s,v)=>s+v,0);
@@ -3245,6 +3280,11 @@ class Component extends DCLogic {
     const CIRC=2*Math.PI*50;
     let catOffset=0;
     const catDonutArcs=catRows.map(o=>{const dash=o.pct/100*CIRC;const arc={color:o.color,dash:dash.toFixed(2),offset:(-catOffset).toFixed(2)};catOffset+=dash;return arc;});
+    const selDayExps=selD?md.exps.filter(e=>parseInt(e.date?.slice(8),10)===selD):[];
+    const selDayRows=selDayExps.map(e=>{const cat=this.cat[e.cat]||this.cat[e.rec];const idx=catL.findIndex(o=>o.c.id===(cat?.id));return{name:cat?.name||e.cat||'Gasto',color:idx>=0?catPalette[idx%catPalette.length]:'#9ca3af',amtFmt:this.fmt0(e.amount)};});
+    const selDayTotFmt=selD?this.fmt0(perDay[selD]||0):'';
+    const selDayLabel=selD?'Día '+selD:'';
+    const showSelDay=!!(selD&&selDayRows.length);
 
     // ---- control por ítem (Anual) ----
     const its=this.items, im=S.itemMatrix;
@@ -3372,6 +3412,7 @@ class Component extends DCLogic {
     const _rv={
       dayNum:this.dayNum, dayRingDash:(dayRC*dayFrac).toFixed(1)+' '+dayRC.toFixed(1),
       dailyBars, diaPromFmt:this.fmt0(diaProm), hoyFmt:this.fmt0(hoy), semanaFmt:this.fmt0(semana), catRows,
+      selDayRows, selDayTotFmt, selDayLabel, showSelDay,
       rootRef:this.rootRef,
       isInicio:S.tab==='inicio', isDiario:S.tab==='diario', isPresup:S.tab==='presupuesto', isAnual:S.tab==='anual', isBanco:S.tab==='banco',
       topKicker: ({inicio:'Mi presupuesto',diario:'Registro',presupuesto:'Plan mensual',banco:'Conciliación',anual:String(this.year)})[S.tab],
@@ -3391,7 +3432,7 @@ class Component extends DCLogic {
       chartPlanPts:planPts, chartRealPts:realPts, chartRealArea:realArea, chartProjPts:projPts,
       chartMetaY:yF(tracked).toFixed(1), chartTodayX:xF(tday).toFixed(1), chartPlotBot:plotBot, chartTicks,
       chartYTicks, chartPadL:String(padL),
-      chartProjLabelY:(yF(projEnd)-12).toFixed(1),
+      chartProjLabelY:Math.max(10,yF(projEnd)-12).toFixed(1),
       chartProjColor:projOver?'#b8472e':'#3f8f63', projEndChartFmt:this.fmt0(projEnd), planEndFmt:this.fmt0(planEnd), chartMetaFmt:this.fmt0(tracked),
       cumpl, cumplHex, cumplMsg,
       chartRealDotX:xF(tday).toFixed(1), chartRealDotY:yF(realToday).toFixed(1), chartProjDotX:xF(dim).toFixed(1), chartProjDotY:yF(projEnd).toFixed(1),
@@ -3444,7 +3485,8 @@ class Component extends DCLogic {
       annualBudgetFmt:this.fmt0(annualBudget),
       ytdActualFmt:this.fmt0(ytdA), ytdBudgetFmt:this.fmt0(ytdBudget), ytdBar:Math.min(100,ytdA/ytdBudget*100), ytdColor:this.sHex(ytdA/ytdBudget*100), ytdPct,
       ytdRemainLabel:ytdA<=ytdBudget?'Ahorrado':'Excedido', ytdRemainFmt:this.fmt0(Math.abs(ytdBudget-ytdA)),
-      months, projectedFmt:(difProyectado>=0?'+':'-')+this.fmt0(Math.abs(difProyectado)), projColor2:difProyectado>=0?'#3f8f63':'#b8472e',
+      months, showMonthDetail, selMonthDetail,
+      projectedFmt:(difProyectado>=0?'+':'-')+this.fmt0(Math.abs(difProyectado)), projColor2:difProyectado>=0?'#3f8f63':'#b8472e',
       recurringTimeline, monthTicks:['E','F','M','A','M','J','J','A','S','O','N','D'],
       itemHeader, monthMatrix, itemFooter,
       gastoAnoTotFmt:this.fmt0(gastoAnoTot), presupTotFmt:this.fmt0(presupTot),
@@ -3454,7 +3496,7 @@ class Component extends DCLogic {
       totalGastoAnhoFmt:(totalGastoAnho>=0?'+':'-')+this.fmt0(Math.abs(totalGastoAnho)), totalGastoAnhoAbsFmt:this.fmt0(Math.abs(totalGastoAnho)), complianceGasto, complianceGastoColor:complianceGasto>100?'#b8472e':'#3f8f63',
       totalConIngresoFmt:(totalConIngreso>=0?'+':'-')+this.fmt0(Math.abs(totalConIngreso)), totalConIngresoAbsFmt:this.fmt0(Math.abs(totalConIngreso)), complianceConIngreso, complianceConIngresoColor:complianceConIngreso>100?'#b8472e':'#3f8f63',
       balanceCajaAnualFmt:this.fmt0(balanceCajaAnual), balanceCajaColor:balanceCajaAnual<0?'#b8472e':'#3f8f63',
-      appVersion:'v2.9',
+      appVersion:'v3.0',
       importMonths:Array.from({length:12},(_,mi)=>({name:this.monthAbbr[mi],imported:S.importedTotals[mi]!=null,closed:!!S.closedMonths[mi],bd:S.importedTotals[mi]!=null?'var(--accent)':'var(--cb)',pick:()=>this.pickImport(mi)})),
       showImportPicker:S.showImportPicker, openImportPicker:()=>this.setState({showImportPicker:true,importMsg:''}), closeImportPicker:()=>this.setState({showImportPicker:false}),
       monthSheet, showMonthSheet:S.showMonth!=null, closeMonth:()=>this.setState({showMonth:null}),
